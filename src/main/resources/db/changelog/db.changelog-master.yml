@@ -1,1 +1,16 @@
 databaseChangeLog:
+
+  - include:
+      file: changeset/db.changelog-20250629_001_create-users-table.sql
+      relativeToChangelogFile: true
+      logicalFilePath: create-users-table.sql
+
+  - include:
+      file: changeset/db.changelog-20250629_002_create-card_info-table.sql
+      relativeToChangelogFile: true
+      logicalFilePath: create-card_info-table.sql
+
+  - include:
+      file: changeset/db.changelog-20250630_003-create-card_info-user_id_idx.sql
+      relativeToChangelogFile: true
+      logicalFilePath: create-card_info-user_id_idx.sql

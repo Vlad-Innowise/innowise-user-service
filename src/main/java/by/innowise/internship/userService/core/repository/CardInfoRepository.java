@@ -6,4 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.UUID;
 
 public interface CardInfoRepository extends JpaRepository<CardInfo, UUID> {
+
+    boolean existsByNumber(String number);
 }

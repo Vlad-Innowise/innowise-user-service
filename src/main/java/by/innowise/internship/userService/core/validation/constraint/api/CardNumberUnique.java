@@ -12,8 +12,7 @@ import java.lang.annotation.Target;
 /**
  * The provided card number must not be assigned to any existing user in the application.
  * {@code null} or {@code blank} numbers are considered valid.
- *
- * */
+ */
 
 @Constraint(validatedBy = CardNumberValidator.class)
 @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.TYPE_USE})

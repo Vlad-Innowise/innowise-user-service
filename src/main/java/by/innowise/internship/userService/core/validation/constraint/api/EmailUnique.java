@@ -12,8 +12,7 @@ import java.lang.annotation.Target;
 /**
  * The provided email must not be assigned to any existing user in the application.
  * {@code null} or {@code blank} elements are considered valid.
- *
- * */
+ */
 
 @Constraint(validatedBy = EmailValidator.class)
 @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.TYPE_USE})

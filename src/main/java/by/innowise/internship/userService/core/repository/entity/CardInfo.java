@@ -2,7 +2,6 @@ package by.innowise.internship.userService.core.repository.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -41,7 +40,7 @@ public class CardInfo extends BaseEntity {
     private LocalDate expirationDate;
 
     @ToString.Exclude
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 

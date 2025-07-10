@@ -29,7 +29,7 @@ public class CardInfoController {
 
     @PostMapping
     public ResponseEntity<CardInfoResponseDto> create(@RequestBody @Valid CardInfoCreateDto dto,
-                                                      @PathVariable Long userId) {
+                                                      @PathVariable @Positive Long userId) {
         log.info("Requested to create a card: {} for user with id: {}", dto, userId);
         CardInfoResponseDto responseDto = cardService.create(dto, userId);
         log.info("Sending a response to a client");

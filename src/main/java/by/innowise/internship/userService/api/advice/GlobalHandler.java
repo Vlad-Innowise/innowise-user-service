@@ -3,6 +3,7 @@ package by.innowise.internship.userService.api.advice;
 import by.innowise.internship.userService.api.dto.exception.ComplexExceptionDto;
 import by.innowise.internship.userService.api.dto.exception.SimpleExceptionDto;
 import by.innowise.internship.userService.api.dto.exception.StructuredExceptionDto;
+import by.innowise.internship.userService.core.exception.ApplicationException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -26,6 +27,14 @@ public class GlobalHandler {
         log.error("Internal server error", e);
         return ResponseEntity.internalServerError()
                              .body(new SimpleExceptionDto(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                                                          e.getMessage()));
+    }
+
+    @ExceptionHandler(ApplicationException.class)
+    public ResponseEntity<SimpleExceptionDto> handle(ApplicationException e) {
+        log.error("Application error: ", e);
+        return ResponseEntity.status(e.getHttpStatus())
+                             .body(new SimpleExceptionDto(e.getHttpStatus().value(),
                                                           e.getMessage()));
     }
 

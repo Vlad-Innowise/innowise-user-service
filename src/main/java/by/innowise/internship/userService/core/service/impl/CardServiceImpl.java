@@ -9,10 +9,13 @@ import by.innowise.internship.userService.core.repository.entity.CardInfo;
 import by.innowise.internship.userService.core.service.api.CardService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -50,5 +53,17 @@ public class CardServiceImpl implements CardService {
                         HttpStatus.NOT_FOUND));
         log.info("Retrieved a card {}", cardInfo);
         return mapper.toDto(cardInfo);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<CardInfoResponseDto> getAll(Long userId, Pageable pageable) {
+        log.info("Invoking card repository to retrieve all cards for user with id: [{}]", userId);
+        Page<CardInfo> cards = cardRepository.findAllByUserId(userId, pageable);
+        log.info("Retrieved cards page {} out of {} for the userId: [{}]: {}", cards.getNumber(), cards.getTotalPages(),
+                 userId, cards.getContent());
+        return cards.stream()
+                    .map(mapper::toDto)
+                    .toList();
     }
 }

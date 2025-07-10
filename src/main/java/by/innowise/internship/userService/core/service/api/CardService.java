@@ -3,7 +3,9 @@ package by.innowise.internship.userService.core.service.api;
 import by.innowise.internship.userService.api.dto.cardInfo.CardInfoCreateDto;
 import by.innowise.internship.userService.api.dto.cardInfo.CardInfoResponseDto;
 import jakarta.validation.constraints.Positive;
+import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface CardService {
@@ -13,4 +15,6 @@ public interface CardService {
     boolean cardNumberExists(String number);
 
     CardInfoResponseDto getById(UUID cardId, @Positive Long userId);
+
+    List<CardInfoResponseDto> getAll(Long userId, Pageable pageable);
 }

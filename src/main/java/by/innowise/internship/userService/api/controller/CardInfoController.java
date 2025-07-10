@@ -7,6 +7,9 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -43,6 +47,17 @@ public class CardInfoController {
         CardInfoResponseDto card = cardService.getById(cardId, userId);
         log.info("Sending a card response to a client {}", card);
         return ResponseEntity.ok(card);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<CardInfoResponseDto>> getAll(@PathVariable @Positive Long userId,
+                                                            @PageableDefault(sort = {"expirationDate"},
+                                                                             direction = Sort.Direction.ASC)
+                                                            Pageable pageable) {
+        log.info("Requested to get all cards for user id: [{}]", userId);
+        List<CardInfoResponseDto> cards = cardService.getAll(userId, pageable);
+        log.info("Sending all cards {} to a client for user id: [{}]", cards, userId);
+        return ResponseEntity.ok(cards);
     }
 
 }

@@ -40,6 +40,7 @@ public class CardServiceImpl implements CardService {
         return cardRepository.existsByNumber(number);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public CardInfoResponseDto getById(UUID cardId, Long userId) {
         log.info("Invoking card repository to retrieve a card by id: [{}]", cardId);

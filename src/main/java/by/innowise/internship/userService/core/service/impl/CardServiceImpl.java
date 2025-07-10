@@ -2,14 +2,18 @@ package by.innowise.internship.userService.core.service.impl;
 
 import by.innowise.internship.userService.api.dto.cardInfo.CardInfoCreateDto;
 import by.innowise.internship.userService.api.dto.cardInfo.CardInfoResponseDto;
+import by.innowise.internship.userService.core.exception.CardNotFoundException;
 import by.innowise.internship.userService.core.mapper.CardInfoMapper;
 import by.innowise.internship.userService.core.repository.CardInfoRepository;
 import by.innowise.internship.userService.core.repository.entity.CardInfo;
 import by.innowise.internship.userService.core.service.api.CardService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -34,5 +38,16 @@ public class CardServiceImpl implements CardService {
     public boolean cardNumberExists(String number) {
         log.info("Checking if card number: {} already exists in the database", number);
         return cardRepository.existsByNumber(number);
+    }
+
+    @Override
+    public CardInfoResponseDto getById(UUID cardId, Long userId) {
+        log.info("Invoking card repository to retrieve a card by id: [{}]", cardId);
+        CardInfo cardInfo = cardRepository.findByIdAndUserId(cardId, userId).orElseThrow(
+                () -> new CardNotFoundException(
+                        String.format("Haven't found a card with id: [%s] for user: [%s]", cardId, userId),
+                        HttpStatus.NOT_FOUND));
+        log.info("Retrieved a card {}", cardInfo);
+        return mapper.toDto(cardInfo);
     }
 }

@@ -1,5 +1,6 @@
 package by.innowise.internship.userService.core.repository.entity;
 
+import by.innowise.internship.userService.core.util.api.Versionable;
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
@@ -22,7 +23,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @SuperBuilder
 @EntityListeners(AuditingEntityListener.class)
-public class BaseEntity {
+public class BaseEntity implements Versionable {
 
     @CreatedDate
     @Column(name = "created_at", updatable = false)

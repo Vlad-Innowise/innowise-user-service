@@ -1,5 +1,6 @@
 package by.innowise.internship.userService.api.dto.cardInfo;
 
+import by.innowise.internship.userService.core.util.api.Versionable;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.LocalDate;
@@ -20,5 +21,10 @@ public record CardInfoResponseDto(
         Long userId,
 
         Long version
-) {
+) implements Versionable {
+
+    @Override
+    public Long getVersion() {
+        return version;
+    }
 }

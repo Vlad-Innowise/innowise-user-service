@@ -2,11 +2,14 @@ package by.innowise.internship.userService.core.service.impl;
 
 import by.innowise.internship.userService.api.dto.cardInfo.CardInfoCreateDto;
 import by.innowise.internship.userService.api.dto.cardInfo.CardInfoResponseDto;
+import by.innowise.internship.userService.api.dto.cardInfo.CardInfoUpdateDto;
 import by.innowise.internship.userService.core.exception.CardNotFoundException;
+import by.innowise.internship.userService.core.exception.IllegalCardUpdateRequestException;
 import by.innowise.internship.userService.core.mapper.CardInfoMapper;
 import by.innowise.internship.userService.core.repository.CardInfoRepository;
 import by.innowise.internship.userService.core.repository.entity.CardInfo;
 import by.innowise.internship.userService.core.service.api.CardService;
+import by.innowise.internship.userService.core.util.validation.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -16,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -25,6 +29,7 @@ public class CardServiceImpl implements CardService {
 
     private final CardInfoRepository cardRepository;
     private final CardInfoMapper mapper;
+    private final ValidationUtil validationUtil;
 
     @Transactional
     @Override
@@ -66,4 +71,58 @@ public class CardServiceImpl implements CardService {
                     .map(mapper::toDto)
                     .toList();
     }
+
+    @Transactional
+    @Override
+    public CardInfoResponseDto update(CardInfoUpdateDto dto, Long userId) {
+
+        log.info("Invoking card repository to find a card with id: [{}] for userId: [{}]", dto.id(), userId);
+        CardInfo foundById = cardRepository.findById(dto.id()).orElseThrow(
+                () -> new CardNotFoundException(
+                        String.format("Haven't found a card with id: [%s] for user: [%s]", dto.id(), userId),
+                        HttpStatus.NOT_FOUND));
+
+        CardInfo updated;
+
+        if (hasAnyFieldChanged(dto, foundById)) {
+            log.info("Check if the provided dto version is not outdated. Dto: [{}] Entity: [{}]", dto, foundById);
+            validationUtil.checkIfDtoVersionIsOutdated(foundById.getVersion(), dto);
+
+            log.info("Check if provided card number [{}] exists in the system and matches to requested card id [{}]",
+                     dto.number(), dto.id());
+            cardRepository.findByNumber(dto.number())
+                          .ifPresent(foundByNumber ->
+                                             checkIfFoundCardByNumberMatchRequestedCardId(foundByNumber, foundById)
+                          );
+
+
+            updated = mapper.updateEntity(dto, foundById);
+            log.info("Updated entity {} to save", updated);
+            cardRepository.saveAndFlush(updated);
+        } else {
+            log.info("Non of the fields in the dto {} have changed any of the fields in the entity {}", dto, foundById);
+            updated = foundById;
+        }
+        return mapper.toDto(updated);
+    }
+
+    private boolean hasAnyFieldChanged(CardInfoUpdateDto d, CardInfo e) {
+        return !(Objects.equals(d.holder(), e.getHolder()) &&
+                Objects.equals(d.number(), e.getNumber()) &&
+                Objects.equals(d.expirationDate(), e.getExpirationDate())
+        );
+    }
+
+    private void checkIfFoundCardByNumberMatchRequestedCardId(CardInfo foundByNumber, CardInfo foundById) {
+        if (!foundByNumber.getId().equals(foundById.getId())) {
+            throw new IllegalCardUpdateRequestException(
+                    String.format(
+                            "Can't update the card number. The card with number [%s] already exists and has card id [%s]," +
+                                    "which doesn't match the requested card id for update [%s] for user [%s]",
+                            foundByNumber.getNumber(), foundByNumber.getId(), foundById.getId(),
+                            foundById.getUser().getId()),
+                    HttpStatus.BAD_REQUEST);
+        }
+    }
+
 }

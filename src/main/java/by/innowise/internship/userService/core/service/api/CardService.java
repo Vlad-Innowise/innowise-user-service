@@ -2,6 +2,7 @@ package by.innowise.internship.userService.core.service.api;
 
 import by.innowise.internship.userService.api.dto.cardInfo.CardInfoCreateDto;
 import by.innowise.internship.userService.api.dto.cardInfo.CardInfoResponseDto;
+import by.innowise.internship.userService.api.dto.cardInfo.CardInfoUpdateDto;
 import jakarta.validation.constraints.Positive;
 import org.springframework.data.domain.Pageable;
 
@@ -17,4 +18,6 @@ public interface CardService {
     CardInfoResponseDto getById(UUID cardId, @Positive Long userId);
 
     List<CardInfoResponseDto> getAll(Long userId, Pageable pageable);
+
+    CardInfoResponseDto update(CardInfoUpdateDto dto, Long userId);
 }

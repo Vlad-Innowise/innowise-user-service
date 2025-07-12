@@ -14,6 +14,8 @@ public interface CardInfoRepository extends JpaRepository<CardInfo, UUID> {
 
     boolean existsByNumber(String number);
 
+    Optional<CardInfo> findByNumber(String number);
+
     @Query("SELECT ci FROM CardInfo ci JOIN FETCH ci.user WHERE ci.id =:id AND ci.user.id =:userId")
     Optional<CardInfo> findByIdAndUserId(@Param("id") UUID id, @Param("userId") Long userId);
 

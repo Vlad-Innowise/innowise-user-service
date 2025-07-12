@@ -2,6 +2,7 @@ package by.innowise.internship.userService.api.controller;
 
 import by.innowise.internship.userService.api.dto.cardInfo.CardInfoCreateDto;
 import by.innowise.internship.userService.api.dto.cardInfo.CardInfoResponseDto;
+import by.innowise.internship.userService.api.dto.cardInfo.CardInfoUpdateDto;
 import by.innowise.internship.userService.core.service.api.CardService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -15,6 +16,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -58,6 +60,15 @@ public class CardInfoController {
         List<CardInfoResponseDto> cards = cardService.getAll(userId, pageable);
         log.info("Sending all cards {} to a client for user id: [{}]", cards, userId);
         return ResponseEntity.ok(cards);
+    }
+
+    @PutMapping
+    public ResponseEntity<CardInfoResponseDto> update(@PathVariable @Positive Long userId,
+                                                      @RequestBody @Valid CardInfoUpdateDto dto) {
+        log.info("Requested to update a card: {} for user id: {}", dto, userId);
+        CardInfoResponseDto updated = cardService.update(dto, userId);
+        log.info("Received updated response dto: {}. Sending response to a client", updated);
+        return ResponseEntity.ok(updated);
     }
 
 }

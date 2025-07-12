@@ -19,6 +19,7 @@ import java.util.UUID;
 
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
+@ToString(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder

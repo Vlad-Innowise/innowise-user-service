@@ -23,6 +23,7 @@ import java.util.List;
 
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
+@ToString(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder

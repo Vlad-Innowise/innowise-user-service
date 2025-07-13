@@ -8,4 +8,6 @@ public interface UserService {
     UserResponseDto create(UserCreateDto dto);
 
     boolean isEmailExists(String email);
+
+    UserResponseDto getById(Long userId);
 }

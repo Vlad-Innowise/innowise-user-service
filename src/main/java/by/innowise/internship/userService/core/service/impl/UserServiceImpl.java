@@ -42,6 +42,14 @@ public class UserServiceImpl implements UserService, InternalUserService {
 
     @Transactional(readOnly = true)
     @Override
+    public UserResponseDto getById(Long userId) {
+        User found = getUserByIdFetchAllCards(userId);
+        log.info("Map fetched user entity {} to dto", found);
+        return mapper.toDto(found);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
     public User getUserById(Long id) {
         log.info("Trying to get a user by id: {}", id);
         User found = userRepository.findById(id)
@@ -50,6 +58,17 @@ public class UserServiceImpl implements UserService, InternalUserService {
                                                    String.format("User with id [%s] doesn't exist", id),
                                                    HttpStatus.NOT_FOUND));
         log.info("Retrieved a user {}", found);
+        return found;
+    }
+
+    private User getUserByIdFetchAllCards(Long id) {
+        log.info("Trying to get a user by id: {} with all cards", id);
+        User found = userRepository.findByIdWithAllCards(id)
+                                   .orElseThrow(
+                                           () -> new UserNotFoundException(
+                                                   String.format("User with id [%s] doesn't exist", id),
+                                                   HttpStatus.NOT_FOUND));
+        log.info("Retrieved a user: {} with all cards {}", found, found.getCards());
         return found;
     }
 }

@@ -1,11 +1,13 @@
 package by.innowise.internship.userService.core.service.impl;
 
+import by.innowise.internship.userService.core.exception.UserNotFoundException;
 import by.innowise.internship.userService.core.repository.UserRepository;
 import by.innowise.internship.userService.core.repository.entity.User;
 import by.innowise.internship.userService.core.service.api.InternalUserService;
 import by.innowise.internship.userService.core.service.api.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,7 +33,8 @@ public class UserServiceImpl implements UserService, InternalUserService {
         User found = userRepository.findById(id)
                                    .orElseThrow(
                                            () -> new UserNotFoundException(
-                                                   String.format("User with id [%s] doesn't exist", id)));
+                                                   String.format("User with id [%s] doesn't exist", id),
+                                                   HttpStatus.NOT_FOUND));
         log.info("Retrieved a user {}", found);
         return found;
     }

@@ -1,6 +1,9 @@
 package by.innowise.internship.userService.core.service.impl;
 
+import by.innowise.internship.userService.api.dto.user.UserCreateDto;
+import by.innowise.internship.userService.api.dto.user.UserResponseDto;
 import by.innowise.internship.userService.core.exception.UserNotFoundException;
+import by.innowise.internship.userService.core.mapper.UserMapper;
 import by.innowise.internship.userService.core.repository.UserRepository;
 import by.innowise.internship.userService.core.repository.entity.User;
 import by.innowise.internship.userService.core.service.api.InternalUserService;
@@ -17,6 +20,17 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserServiceImpl implements UserService, InternalUserService {
 
     private final UserRepository userRepository;
+    private final UserMapper mapper;
+
+    @Transactional
+    @Override
+    public UserResponseDto create(UserCreateDto dto) {
+        User toSave = mapper.toEntity(dto);
+        log.info("Invoking user repository to save user: {}", toSave);
+        User saved = userRepository.saveAndFlush(toSave);
+        log.info("Map a created user entity {} to dto", saved);
+        return mapper.toDto(saved);
+    }
 
     @Transactional(readOnly = true)
     @Override

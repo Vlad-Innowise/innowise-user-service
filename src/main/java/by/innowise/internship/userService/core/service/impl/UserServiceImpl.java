@@ -28,7 +28,7 @@ public class UserServiceImpl implements UserService, InternalUserService {
 
     @Transactional(readOnly = true)
     @Override
-    public User getById(Long id) {
+    public User getUserById(Long id) {
         log.info("Trying to get a user by id: {}", id);
         User found = userRepository.findById(id)
                                    .orElseThrow(

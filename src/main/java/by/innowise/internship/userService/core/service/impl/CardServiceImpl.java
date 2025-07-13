@@ -8,7 +8,9 @@ import by.innowise.internship.userService.core.exception.IllegalCardUpdateReques
 import by.innowise.internship.userService.core.mapper.CardInfoMapper;
 import by.innowise.internship.userService.core.repository.CardInfoRepository;
 import by.innowise.internship.userService.core.repository.entity.CardInfo;
+import by.innowise.internship.userService.core.repository.entity.User;
 import by.innowise.internship.userService.core.service.api.CardService;
+import by.innowise.internship.userService.core.service.api.InternalUserService;
 import by.innowise.internship.userService.core.util.validation.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,16 +31,23 @@ public class CardServiceImpl implements CardService {
 
     private final CardInfoRepository cardRepository;
     private final CardInfoMapper mapper;
+    private final InternalUserService internalUserService;
     private final ValidationUtil validationUtil;
 
     @Transactional
     @Override
     public CardInfoResponseDto create(CardInfoCreateDto dto, Long userId) {
-        CardInfo saved = cardRepository.saveAndFlush(mapper.toEntity(dto, userId));
-        log.info("Saved a card info: {}", saved);
-        CardInfoResponseDto responseDto = mapper.toDto(saved);
-        log.info("Returning a response dto: {}", responseDto);
-        return responseDto;
+        log.info("Invoking internal user service to get a user by userId: [{}]", userId);
+        User user = internalUserService.getUserById(userId);
+
+        log.info("Mapping cardInfoCreateDto:{} and user:{} to card entity", dto, user);
+        CardInfo toSave = mapper.toEntity(dto, user);
+
+        log.info("Invoking card repository to save card: {}", toSave);
+        CardInfo saved = cardRepository.saveAndFlush(toSave);
+
+        log.info("Map user entity {} to dto", saved);
+        return mapper.toDto(saved);
     }
 
     @Transactional(readOnly = true)

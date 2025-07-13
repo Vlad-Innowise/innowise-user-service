@@ -4,6 +4,6 @@ import by.innowise.internship.userService.core.repository.entity.User;
 
 public interface InternalUserService {
 
-    User getById(Long id);
+    User getUserById(Long id);
 
 }

@@ -4,7 +4,7 @@ import by.innowise.internship.userService.api.dto.cardInfo.CardInfoCreateDto;
 import by.innowise.internship.userService.api.dto.cardInfo.CardInfoResponseDto;
 import by.innowise.internship.userService.api.dto.cardInfo.CardInfoUpdateDto;
 import by.innowise.internship.userService.core.repository.entity.CardInfo;
-import by.innowise.internship.userService.core.util.mapper.CardInfoMapperHelper;
+import by.innowise.internship.userService.core.repository.entity.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -12,7 +12,6 @@ import org.mapstruct.MappingTarget;
 import java.util.UUID;
 
 @Mapper(config = BaseMapper.class,
-        uses = {CardInfoMapperHelper.class},
         imports = {UUID.class})
 public interface CardInfoMapper {
 
@@ -23,8 +22,8 @@ public interface CardInfoMapper {
     @Mapping(source = "dto.number", target = "number")
     @Mapping(source = "dto.holder", target = "holder")
     @Mapping(source = "dto.expirationDate", target = "expirationDate")
-    @Mapping(source = "userId", target = "user", qualifiedByName = "mapUserById")
-    CardInfo toEntity(CardInfoCreateDto dto, Long userId);
+    @Mapping(source = "user", target = "user")
+    CardInfo toEntity(CardInfoCreateDto dto, User user);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "version", ignore = true)

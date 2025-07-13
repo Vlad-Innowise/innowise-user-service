@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -97,6 +98,14 @@ public class GlobalHandler {
         log.error("Invalid data: {}", errors, e);
         return ResponseEntity.badRequest()
                              .body(new ComplexExceptionDto(HttpStatus.BAD_REQUEST.value(), errors));
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<SimpleExceptionDto> handle(MissingServletRequestParameterException e) {
+        String message = String.format("Missing required request parameter: {%s}", e.getParameterName());
+        log.error(message, e);
+        return ResponseEntity.badRequest()
+                             .body(new SimpleExceptionDto(HttpStatus.BAD_REQUEST.value(), message));
     }
 
 }

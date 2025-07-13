@@ -17,7 +17,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -93,6 +96,23 @@ public class UserServiceImpl implements UserService, InternalUserService {
         User found = getUserByIdFetchAllCards(userId);
         log.info("Invoking user repository to delete a user: [{}]", found);
         userRepository.delete(found);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<UserResponseDto> getAllByIds(List<Long> ids) {
+        Set<Long> idsToFind = new HashSet<>(ids);
+        log.info("Invoking user repository for ids: [{}]", idsToFind);
+        List<User> foundUsers = userRepository.findByIdIn(idsToFind);
+        log.info("Retrieved users list: {}", foundUsers);
+
+        if (foundUsers.size() != idsToFind.size()) {
+            foundUsers.forEach(u -> idsToFind.remove(u.getId()));
+            log.info("Haven't found users with ids: {}", idsToFind);
+        }
+        return foundUsers.stream()
+                         .map(mapper::toDto)
+                         .toList();
     }
 
     @Transactional(readOnly = true)

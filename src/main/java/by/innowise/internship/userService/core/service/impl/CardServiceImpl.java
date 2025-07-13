@@ -20,8 +20,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -112,6 +114,24 @@ public class CardServiceImpl implements CardService {
         CardInfo found = getCardByCardIdAndUserId(cardId, userId);
         log.info("Invoking card repository to delete a card: [{}]", found);
         cardRepository.delete(found);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<CardInfoResponseDto> getAllByIds(List<UUID> ids) {
+        Set<UUID> idsToFind = new HashSet<>(ids);
+        log.info("Invoking card repository for ids: {}", idsToFind);
+        List<CardInfo> foundCards = cardRepository.findAllByIdIn(idsToFind);
+        log.info("Retrieved cards list: {}", foundCards);
+
+        if (foundCards.size() != idsToFind.size()) {
+            foundCards.forEach(u -> idsToFind.remove(u.getId()));
+            log.info("Haven't found cards with ids: {}", idsToFind);
+        }
+
+        return foundCards.stream()
+                         .map(mapper::toDto)
+                         .toList();
     }
 
     private CardInfo getCardByCardIdAndUserId(UUID cardId, Long userId) {

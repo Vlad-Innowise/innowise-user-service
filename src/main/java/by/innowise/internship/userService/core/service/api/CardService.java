@@ -22,4 +22,6 @@ public interface CardService {
     CardInfoResponseDto update(CardInfoUpdateDto dto, Long userId);
 
     void delete(UUID cardId, Long userId);
+
+    List<CardInfoResponseDto> getAllByIds(List<UUID> ids);
 }

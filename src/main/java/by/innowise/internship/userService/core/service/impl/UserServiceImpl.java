@@ -2,17 +2,22 @@ package by.innowise.internship.userService.core.service.impl;
 
 import by.innowise.internship.userService.api.dto.user.UserCreateDto;
 import by.innowise.internship.userService.api.dto.user.UserResponseDto;
+import by.innowise.internship.userService.api.dto.user.UserUpdateDto;
+import by.innowise.internship.userService.core.exception.UniqueConstraintViolationException;
 import by.innowise.internship.userService.core.exception.UserNotFoundException;
 import by.innowise.internship.userService.core.mapper.UserMapper;
 import by.innowise.internship.userService.core.repository.UserRepository;
 import by.innowise.internship.userService.core.repository.entity.User;
 import by.innowise.internship.userService.core.service.api.InternalUserService;
 import by.innowise.internship.userService.core.service.api.UserService;
+import by.innowise.internship.userService.core.util.validation.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +26,7 @@ public class UserServiceImpl implements UserService, InternalUserService {
 
     private final UserRepository userRepository;
     private final UserMapper mapper;
+    private final ValidationUtil validationUtil;
 
     @Transactional
     @Override
@@ -48,6 +54,39 @@ public class UserServiceImpl implements UserService, InternalUserService {
         return mapper.toDto(found);
     }
 
+    @Transactional
+    @Override
+    public UserResponseDto update(UserUpdateDto dto, Long userId) {
+
+        User foundById = getUserByIdFetchAllCards(userId);
+
+        User updated;
+        if (hasAnyFieldChanged(dto, foundById)) {
+            log.info("Check if the provided dto version is not outdated. Dto: [{}] Entity: [{}]", dto, foundById);
+            validationUtil.checkIfDtoVersionIsOutdated(foundById.getVersion(), dto);
+
+
+            String emailToCheck = dto.email();
+            log.info("Check if the provided email doesn't exists [{}]", emailToCheck);
+            if (!Objects.equals(emailToCheck, foundById.getEmail())) {
+                userRepository.findByEmail(emailToCheck)
+                              .ifPresent(user -> {
+                                  throw new UniqueConstraintViolationException(
+                                          String.format("Can't update the email to: [%s]. This email already exists!",
+                                                        emailToCheck), HttpStatus.BAD_REQUEST);
+                              });
+            }
+
+            updated = mapper.updateEntity(dto, foundById);
+            log.info("Updated entity {} to save", updated);
+            userRepository.saveAndFlush(updated);
+        } else {
+            log.info("Non of the fields in the dto {} have changed any of the fields in the entity {}", dto, foundById);
+            updated = foundById;
+        }
+        return mapper.toDto(updated);
+    }
+
     @Transactional(readOnly = true)
     @Override
     public User getUserById(Long id) {
@@ -70,5 +109,13 @@ public class UserServiceImpl implements UserService, InternalUserService {
                                                    HttpStatus.NOT_FOUND));
         log.info("Retrieved a user: {} with all cards {}", found, found.getCards());
         return found;
+    }
+
+    private boolean hasAnyFieldChanged(UserUpdateDto d, User e) {
+        return !(Objects.equals(d.name(), e.getName()) &&
+                Objects.equals(d.surname(), e.getSurname()) &&
+                Objects.equals(d.birthDate(), e.getBirthDate()) &&
+                Objects.equals(d.email(), e.getEmail())
+        );
     }
 }

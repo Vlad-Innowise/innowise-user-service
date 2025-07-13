@@ -51,13 +51,8 @@ public class CardServiceImpl implements CardService {
     @Transactional(readOnly = true)
     @Override
     public CardInfoResponseDto getById(UUID cardId, Long userId) {
-        log.info("Invoking card repository to retrieve a card by id: [{}]", cardId);
-        CardInfo cardInfo = cardRepository.findByIdAndUserId(cardId, userId).orElseThrow(
-                () -> new CardNotFoundException(
-                        String.format("Haven't found a card with id: [%s] for user: [%s]", cardId, userId),
-                        HttpStatus.NOT_FOUND));
-        log.info("Retrieved a card {}", cardInfo);
-        return mapper.toDto(cardInfo);
+        CardInfo found = getCardByCardIdAndUserId(cardId, userId);
+        return mapper.toDto(found);
     }
 
     @Transactional(readOnly = true)
@@ -76,11 +71,7 @@ public class CardServiceImpl implements CardService {
     @Override
     public CardInfoResponseDto update(CardInfoUpdateDto dto, Long userId) {
 
-        log.info("Invoking card repository to find a card with id: [{}] for userId: [{}]", dto.id(), userId);
-        CardInfo foundById = cardRepository.findById(dto.id()).orElseThrow(
-                () -> new CardNotFoundException(
-                        String.format("Haven't found a card with id: [%s] for user: [%s]", dto.id(), userId),
-                        HttpStatus.NOT_FOUND));
+        CardInfo foundById = getCardByCardIdAndUserId(dto.id(), userId);
 
         CardInfo updated;
 
@@ -104,6 +95,24 @@ public class CardServiceImpl implements CardService {
             updated = foundById;
         }
         return mapper.toDto(updated);
+    }
+
+    @Transactional
+    @Override
+    public void delete(UUID cardId, Long userId) {
+        CardInfo found = getCardByCardIdAndUserId(cardId, userId);
+        log.info("Invoking card repository to delete a card: [{}]", found);
+        cardRepository.delete(found);
+    }
+
+    private CardInfo getCardByCardIdAndUserId(UUID cardId, Long userId) {
+        log.info("Invoking card repository to find a card with id: [{}] for userId: [{}]", cardId, userId);
+        CardInfo found = cardRepository.findByIdAndUserId(cardId, userId).orElseThrow(
+                () -> new CardNotFoundException(
+                        String.format("Haven't found a card with id: [%s] for user: [%s]", cardId, userId),
+                        HttpStatus.NOT_FOUND));
+        log.info("Retrieved a card {}", found);
+        return found;
     }
 
     private boolean hasAnyFieldChanged(CardInfoUpdateDto d, CardInfo e) {

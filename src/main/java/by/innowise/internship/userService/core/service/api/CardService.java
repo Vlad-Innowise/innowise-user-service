@@ -20,4 +20,6 @@ public interface CardService {
     List<CardInfoResponseDto> getAll(Long userId, Pageable pageable);
 
     CardInfoResponseDto update(CardInfoUpdateDto dto, Long userId);
+
+    void delete(UUID cardId, Long userId);
 }

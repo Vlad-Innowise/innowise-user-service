@@ -11,8 +11,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -69,6 +71,14 @@ public class CardInfoController {
         CardInfoResponseDto updated = cardService.update(dto, userId);
         log.info("Received updated response dto: {}. Sending response to a client", updated);
         return ResponseEntity.ok(updated);
+    }
+
+    @DeleteMapping("/{cardId}")
+    public ResponseEntity<HttpStatus> delete(@PathVariable @Positive Long userId,
+                                             @PathVariable UUID cardId) {
+        log.info("Requested to delete a card with id: [{}] for user id: [{}]", cardId, userId);
+        cardService.delete(cardId, userId);
+        return ResponseEntity.ok(HttpStatus.OK);
     }
 
 }

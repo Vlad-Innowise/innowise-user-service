@@ -1,7 +1,7 @@
 package by.innowise.internship.userService.core.util.validation;
 
 import by.innowise.internship.userService.core.exception.UpdateDtoVersionOutdatedException;
-import by.innowise.internship.userService.core.util.api.Versionable;
+import by.innowise.internship.userService.core.platform.api.Versionable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 

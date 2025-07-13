@@ -87,6 +87,14 @@ public class UserServiceImpl implements UserService, InternalUserService {
         return mapper.toDto(updated);
     }
 
+    @Transactional
+    @Override
+    public void delete(Long userId) {
+        User found = getUserByIdFetchAllCards(userId);
+        log.info("Invoking user repository to delete a user: [{}]", found);
+        userRepository.delete(found);
+    }
+
     @Transactional(readOnly = true)
     @Override
     public User getUserById(Long id) {

@@ -8,8 +8,10 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -49,5 +51,13 @@ public class UserController {
         UserResponseDto responseDto = userService.update(dto, userId);
         log.info("Updated a user: {}", responseDto);
         return ResponseEntity.ok(responseDto);
+    }
+
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<HttpStatus> delete(@PathVariable @Positive Long userId) {
+        log.info("Requested to delete a user with id: [{}] ", userId);
+        userService.delete(userId);
+        log.info("User with id: [{}] successfully deleted", userId);
+        return ResponseEntity.ok(HttpStatus.OK);
     }
 }

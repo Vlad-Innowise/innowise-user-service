@@ -8,14 +8,14 @@ spring:
   data:
     web:
       pageable:
-        default-page-size: '5'
-        max-page-size: '50'
+        default-page-size: 5
+        max-page-size: 50
         one-indexed-parameters: 'true'
 
   datasource:
     driverClassName: 'org.postgresql.Driver'
     hikari:
-      maximum-pool-size: '20'
+      maximum-pool-size: 20
 
   jpa:
     database-platform: 'org.hibernate.dialect.PostgreSQLDialect'

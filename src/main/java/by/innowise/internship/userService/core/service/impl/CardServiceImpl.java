@@ -3,6 +3,9 @@ package by.innowise.internship.userService.core.service.impl;
 import by.innowise.internship.userService.api.dto.cardInfo.CardInfoCreateDto;
 import by.innowise.internship.userService.api.dto.cardInfo.CardInfoResponseDto;
 import by.innowise.internship.userService.api.dto.cardInfo.CardInfoUpdateDto;
+import by.innowise.internship.userService.core.cache.CacheUtil;
+import by.innowise.internship.userService.core.cache.CardInfoCacheService;
+import by.innowise.internship.userService.core.cache.dto.CardCacheDto;
 import by.innowise.internship.userService.core.exception.CardNotFoundException;
 import by.innowise.internship.userService.core.exception.IllegalCardUpdateRequestException;
 import by.innowise.internship.userService.core.mapper.CardInfoMapper;
@@ -31,10 +34,13 @@ import java.util.UUID;
 @Slf4j
 public class CardServiceImpl implements CardService {
 
+    private static final String CARDS_CACHE = "cards";
     private final CardInfoRepository cardRepository;
     private final CardInfoMapper mapper;
     private final InternalUserService internalUserService;
     private final ValidationUtil validationUtil;
+    private final CardInfoCacheService cardInfoCacheService;
+    private final CacheUtil cacheUtil;
 
     @Transactional
     @Override
@@ -47,8 +53,11 @@ public class CardServiceImpl implements CardService {
 
         log.info("Invoking card repository to save card: {}", toSave);
         CardInfo saved = cardRepository.saveAndFlush(toSave);
+        log.info("Get pre-saved card entity from repository: {}", saved);
 
-        log.info("Map user entity {} to dto", saved);
+        updateCache(saved);
+
+        log.info("Map user entity: {} to dto", saved);
         return mapper.toDto(saved);
     }
 
@@ -59,11 +68,23 @@ public class CardServiceImpl implements CardService {
         return cardRepository.existsByNumber(number);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     @Override
     public CardInfoResponseDto getById(UUID cardId, Long userId) {
-        CardInfo found = getCardByCardIdAndUserId(cardId, userId);
-        return mapper.toDto(found);
+        String cacheKey = cacheUtil.composeKey("id", cardId);
+        log.info("Trying to retrieve a card from cache by key: {}", cacheKey);
+        return cardInfoCacheService
+                .readFromCache(CARDS_CACHE, cacheKey)
+                .map(cached -> {
+                    log.info("Retrieved a card from the cache: {}", cached);
+                    return mapper.toDto(cached);
+                })
+                .orElseGet(() -> {
+                    log.info("Not found in cache by key: {}, go to DB", cacheKey);
+                    CardInfo found = getCardByCardIdAndUserId(cardId, userId);
+                    cardInfoCacheService.updateCache("cards", cacheKey, mapper.toRedisDto(found));
+                    return mapper.toDto(found);
+                });
     }
 
     @Transactional(readOnly = true)
@@ -96,11 +117,11 @@ public class CardServiceImpl implements CardService {
                           .ifPresent(foundByNumber ->
                                              checkIfFoundCardByNumberMatchRequestedCardId(foundByNumber, foundById)
                           );
-
-
             updated = mapper.updateEntity(dto, foundById);
             log.info("Updated entity {} to save", updated);
             cardRepository.saveAndFlush(updated);
+
+            updateCache(updated);
         } else {
             log.info("Non of the fields in the dto {} have changed any of the fields in the entity {}", dto, foundById);
             updated = foundById;
@@ -114,6 +135,9 @@ public class CardServiceImpl implements CardService {
         CardInfo found = getCardByCardIdAndUserId(cardId, userId);
         log.info("Invoking card repository to delete a card: [{}]", found);
         cardRepository.delete(found);
+        String cacheKey = cacheUtil.composeKey("id", cardId);
+        log.info("Invoking cache service to remove a cache for a key: {}", cacheKey);
+        cardInfoCacheService.removeFromCache(CARDS_CACHE, cacheKey);
     }
 
     @Transactional(readOnly = true)
@@ -140,7 +164,7 @@ public class CardServiceImpl implements CardService {
                 () -> new CardNotFoundException(
                         String.format("Haven't found a card with id: [%s] for user: [%s]", cardId, userId),
                         HttpStatus.NOT_FOUND));
-        log.info("Retrieved a card {}", found);
+        log.info("Retrieved a card from from DB: {}", found);
         return found;
     }
 
@@ -161,6 +185,13 @@ public class CardServiceImpl implements CardService {
                             foundById.getUser().getId()),
                     HttpStatus.BAD_REQUEST);
         }
+    }
+
+    private void updateCache(CardInfo entity) {
+        CardCacheDto cacheDto = mapper.toRedisDto(entity);
+        String cacheKey = cacheUtil.composeKey("id", cacheDto.getId());
+        log.info("Putting value: {} into cache: [{}]", cacheDto, CARDS_CACHE);
+        cardInfoCacheService.updateCache(CARDS_CACHE, cacheKey, cacheDto);
     }
 
 }

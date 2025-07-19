@@ -1,7 +1,8 @@
 package by.innowise.internship.userService.core.cache.impl;
 
 import by.innowise.internship.userService.core.cache.CacheBase;
-import by.innowise.internship.userService.core.cache.CacheUtil;
+import by.innowise.internship.userService.core.cache.supportedCaches.CacheType;
+import by.innowise.internship.userService.core.validation.validator.CacheValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.Cache;
@@ -16,12 +17,13 @@ import java.util.Optional;
 public abstract class AbstractCache<T> implements CacheBase<T> {
 
     private final CacheManager cacheManager;
-    private final CacheUtil cacheUtil;
+    private final CacheValidator validator;
 
     @Override
-    public Optional<T> readFromCache(String cacheName, String key) {
+    public Optional<T> readFromCache(CacheType cacheType, String key) {
+        String cacheName = cacheType.getCacheName();
         log.info("Retrieving a cache by name: [{}]", cacheName);
-        Cache cache = cacheUtil.getCache(getCacheSetName(), cacheName, cacheManager);
+        Cache cache = validateAndGet(cacheName);
         log.info("Trying to read from cache: [{}] by key: {}", cacheName, key);
         return Optional.ofNullable(cache.get(key))
                        .map(Cache.ValueWrapper::get)
@@ -29,35 +31,43 @@ public abstract class AbstractCache<T> implements CacheBase<T> {
     }
 
     @Override
-    public void updateCache(String cacheName, String key, T value) {
+    public void updateCache(CacheType cacheType, String key, T value) {
+        String cacheName = cacheType.getCacheName();
         log.info("Updating a cache: [{}] with key: {} value: {}", cacheName, key, value);
-        Cache cache = cacheUtil.getCache(getCacheSetName(), cacheName, cacheManager);
+        Cache cache = validateAndGet(cacheName);
         cache.put(key, value);
         log.info("Cache for the key: {} was updated with a value: {}", key, value);
     }
 
     @Override
-    public void removeFromCache(String cacheName, String key) {
+    public void removeFromCache(CacheType cacheType, String key) {
+        String cacheName = cacheType.getCacheName();
         log.info("Deleting a key entry: {} from a cache: [{}]", key, cacheName);
-        Cache cache = cacheUtil.getCache(getCacheSetName(), cacheName, cacheManager);
+        Cache cache = validateAndGet(cacheName);
         cache.evict(key);
         log.info("The key: {} was removed", String.join("::", cacheName, key));
     }
 
     @Override
-    public void invalidateCache(String cacheName) {
+    public void invalidateCache(CacheType cacheType) {
+        String cacheName = cacheType.getCacheName();
         log.info("Invalidating all entries for a cache: [{}]", cacheName);
-        Cache cache = cacheUtil.getCache(getCacheSetName(), cacheName, cacheManager);
+        Cache cache = validateAndGet(cacheName);
         cache.clear();
         log.info("Cache: [{}] was invalidated", cacheName);
     }
 
-    protected CacheManager getCacheManager() {
-        return this.cacheManager;
+    private Cache validateAndGet(String cacheName) {
+        validator.validate(getCacheSetName(), cacheName);
+        return cacheManager.getCache(cacheName);
     }
 
-    protected CacheUtil getCacheUtil() {
-        return this.cacheUtil;
+    protected CacheManager getCacheManager() {
+        return cacheManager;
+    }
+
+    protected CacheValidator getCacheValidator() {
+        return validator;
     }
 
 }

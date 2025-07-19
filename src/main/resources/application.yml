@@ -39,6 +39,3 @@ application:
   cache:
     redis:
       time-to-live-in-minutes: 5
-      supported-caches:
-        cardInfo:
-          - 'cards'

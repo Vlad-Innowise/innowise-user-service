@@ -1,5 +1,8 @@
 package by.innowise.internship.userService.core.config;
 
+import by.innowise.internship.userService.core.cache.supportedCaches.CacheType;
+import by.innowise.internship.userService.core.cache.supportedCaches.CardCache;
+import by.innowise.internship.userService.core.cache.supportedCaches.UserCache;
 import by.innowise.internship.userService.core.config.property.CacheProperty;
 import by.innowise.internship.userService.core.config.property.RedisProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -23,8 +26,10 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @EnableCaching
 @Configuration
@@ -82,14 +87,15 @@ public class RedisConfig {
                                        .disableCachingNullValues()
                                        .entryTtl(Duration.ofMinutes(cacheProperty.getTimeToLiveInMinutes()));
 
-        Set<String> cacheNames =
-                cacheProperty.getSupportedCaches().values().stream()
-                             .flatMap(Set::stream)
-                             .collect(Collectors.toSet());
+        Set<String> supportedCaches = Stream.of(UserCache.values(),
+                                                CardCache.values())
+                                            .flatMap(Arrays::stream)
+                                            .map(CacheType::getCacheName)
+                                            .collect(Collectors.toSet());
 
         return RedisCacheManager.builder(factory)
                                 .cacheDefaults(config)
-                                .initialCacheNames(cacheNames)
+                                .initialCacheNames(supportedCaches)
                                 .transactionAware()
                                 .build();
     }

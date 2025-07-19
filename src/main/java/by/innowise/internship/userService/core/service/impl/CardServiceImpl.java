@@ -6,6 +6,7 @@ import by.innowise.internship.userService.api.dto.cardInfo.CardInfoUpdateDto;
 import by.innowise.internship.userService.core.cache.CacheUtil;
 import by.innowise.internship.userService.core.cache.CardInfoCacheService;
 import by.innowise.internship.userService.core.cache.dto.CardCacheDto;
+import by.innowise.internship.userService.core.cache.supportedCaches.CardCache;
 import by.innowise.internship.userService.core.exception.CardNotFoundException;
 import by.innowise.internship.userService.core.exception.IllegalCardUpdateRequestException;
 import by.innowise.internship.userService.core.mapper.CardInfoMapper;
@@ -34,7 +35,6 @@ import java.util.UUID;
 @Slf4j
 public class CardServiceImpl implements CardService {
 
-    private static final String CARDS_CACHE = "cards";
     private final CardInfoRepository cardRepository;
     private final CardInfoMapper mapper;
     private final InternalUserService internalUserService;
@@ -74,7 +74,7 @@ public class CardServiceImpl implements CardService {
         String cacheKey = cacheUtil.composeKey("id", cardId);
         log.info("Trying to retrieve a card from cache by key: {}", cacheKey);
         return cardInfoCacheService
-                .readFromCache(CARDS_CACHE, cacheKey)
+                .readFromCache(CardCache.BY_ID, cacheKey)
                 .map(cached -> {
                     log.info("Retrieved a card from the cache: {}", cached);
                     return mapper.toDto(cached);
@@ -82,7 +82,7 @@ public class CardServiceImpl implements CardService {
                 .orElseGet(() -> {
                     log.info("Not found in cache by key: {}, go to DB", cacheKey);
                     CardInfo found = getCardByCardIdAndUserId(cardId, userId);
-                    cardInfoCacheService.updateCache("cards", cacheKey, mapper.toRedisDto(found));
+                    cardInfoCacheService.updateCache(CardCache.BY_ID, cacheKey, mapper.toRedisDto(found));
                     return mapper.toDto(found);
                 });
     }
@@ -137,7 +137,7 @@ public class CardServiceImpl implements CardService {
         cardRepository.delete(found);
         String cacheKey = cacheUtil.composeKey("id", cardId);
         log.info("Invoking cache service to remove a cache for a key: {}", cacheKey);
-        cardInfoCacheService.removeFromCache(CARDS_CACHE, cacheKey);
+        cardInfoCacheService.removeFromCache(CardCache.BY_ID, cacheKey);
     }
 
     @Transactional(readOnly = true)
@@ -190,8 +190,8 @@ public class CardServiceImpl implements CardService {
     private void updateCache(CardInfo entity) {
         CardCacheDto cacheDto = mapper.toRedisDto(entity);
         String cacheKey = cacheUtil.composeKey("id", cacheDto.getId());
-        log.info("Putting value: {} into cache: [{}]", cacheDto, CARDS_CACHE);
-        cardInfoCacheService.updateCache(CARDS_CACHE, cacheKey, cacheDto);
+        log.info("Putting value: {} into cache: [{}]", cacheDto, CardCache.BY_ID.getCacheName());
+        cardInfoCacheService.updateCache(CardCache.BY_ID, cacheKey, cacheDto);
     }
 
 }

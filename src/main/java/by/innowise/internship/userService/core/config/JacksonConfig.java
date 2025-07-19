@@ -4,11 +4,14 @@ import by.innowise.internship.userService.core.util.jackson.CustomLocalDateDeser
 import by.innowise.internship.userService.core.util.jackson.CustomLocalDateSerializer;
 import by.innowise.internship.userService.core.util.jackson.CustomLocalDateTimeDeserializer;
 import by.innowise.internship.userService.core.util.jackson.CustomLocalDateTimeSerializer;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -41,5 +44,13 @@ public class JacksonConfig {
 
             builder.featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         };
+    }
+
+    @Bean
+    @Primary
+    public ObjectMapper restObjectMapper(Jackson2ObjectMapperBuilder builder,
+                                         Jackson2ObjectMapperBuilderCustomizer jsonCustomizer) {
+        jsonCustomizer.customize(builder);
+        return builder.build();
     }
 }

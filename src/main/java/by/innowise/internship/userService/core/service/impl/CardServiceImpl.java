@@ -5,6 +5,7 @@ import by.innowise.internship.userService.api.dto.cardInfo.CardInfoResponseDto;
 import by.innowise.internship.userService.api.dto.cardInfo.CardInfoUpdateDto;
 import by.innowise.internship.userService.core.cache.CacheUtil;
 import by.innowise.internship.userService.core.cache.CardInfoCacheService;
+import by.innowise.internship.userService.core.cache.UserCacheInvalidator;
 import by.innowise.internship.userService.core.cache.dto.CardCacheDto;
 import by.innowise.internship.userService.core.cache.supportedCaches.CardCache;
 import by.innowise.internship.userService.core.exception.CardNotFoundException;
@@ -41,6 +42,7 @@ public class CardServiceImpl implements CardService {
     private final ValidationUtil validationUtil;
     private final CardInfoCacheService cardInfoCacheService;
     private final CacheUtil cacheUtil;
+    private final UserCacheInvalidator userCacheInvalidator;
 
     @Transactional
     @Override
@@ -56,6 +58,8 @@ public class CardServiceImpl implements CardService {
         log.info("Get pre-saved card entity from repository: {}", saved);
 
         updateCache(saved);
+
+        invalidatingUserCache(userId);
 
         log.info("Map user entity: {} to dto", saved);
         return mapper.toDto(saved);
@@ -82,7 +86,7 @@ public class CardServiceImpl implements CardService {
                 .orElseGet(() -> {
                     log.info("Not found in cache by key: {}, go to DB", cacheKey);
                     CardInfo found = getCardByCardIdAndUserId(cardId, userId);
-                    cardInfoCacheService.updateCache(CardCache.BY_ID, cacheKey, mapper.toRedisDto(found));
+                    updateCache(found);
                     return mapper.toDto(found);
                 });
     }
@@ -122,6 +126,7 @@ public class CardServiceImpl implements CardService {
             cardRepository.saveAndFlush(updated);
 
             updateCache(updated);
+            invalidatingUserCache(userId);
         } else {
             log.info("Non of the fields in the dto {} have changed any of the fields in the entity {}", dto, foundById);
             updated = foundById;
@@ -138,6 +143,7 @@ public class CardServiceImpl implements CardService {
         String cacheKey = cacheUtil.composeKey("id", cardId);
         log.info("Invoking cache service to remove a cache for a key: {}", cacheKey);
         cardInfoCacheService.removeFromCache(CardCache.BY_ID, cacheKey);
+        invalidatingUserCache(userId);
     }
 
     @Transactional(readOnly = true)
@@ -194,4 +200,9 @@ public class CardServiceImpl implements CardService {
         cardInfoCacheService.updateCache(CardCache.BY_ID, cacheKey, cacheDto);
     }
 
+
+    private void invalidatingUserCache(Long userId) {
+        log.info("Invalidating a user cache for user: [{}]", userId);
+        userCacheInvalidator.invalidate(userId);
+    }
 }

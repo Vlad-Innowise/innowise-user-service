@@ -3,6 +3,7 @@ package by.innowise.internship.userService.core.mapper;
 import by.innowise.internship.userService.api.dto.user.UserCreateDto;
 import by.innowise.internship.userService.api.dto.user.UserResponseDto;
 import by.innowise.internship.userService.api.dto.user.UserUpdateDto;
+import by.innowise.internship.userService.core.cache.dto.UserCacheDto;
 import by.innowise.internship.userService.core.repository.entity.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -27,5 +28,9 @@ public interface UserMapper {
     User updateEntity(UserUpdateDto dto, @MappingTarget User entity);
 
     UserResponseDto toDto(User e);
+
+    UserCacheDto toRedisDto(User e);
+
+    UserResponseDto toDto(UserCacheDto cacheDto);
 
 }

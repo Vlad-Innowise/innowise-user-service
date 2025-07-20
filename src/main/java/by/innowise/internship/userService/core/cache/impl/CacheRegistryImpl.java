@@ -15,11 +15,16 @@ public class CacheRegistryImpl implements CacheRegistry {
 
     @Override
     public Set<String> getRegisteredByCacheSetName(String cacheSetName) {
-        return supportedCachesBySetName.getOrDefault(cacheSetName, Collections.emptySet());
+        Set<String> supportedCaches = supportedCachesBySetName.getOrDefault(cacheSetName, Collections.emptySet());
+        return isNotEmpty(supportedCaches) ? Set.copyOf(supportedCaches) : supportedCaches;
     }
 
     @Override
     public void register(String cacheSetName, Set<String> supportedCaches) {
         supportedCachesBySetName.put(cacheSetName, supportedCaches);
+    }
+
+    private boolean isNotEmpty(Set<String> supportedCaches) {
+        return !supportedCaches.isEmpty();
     }
 }

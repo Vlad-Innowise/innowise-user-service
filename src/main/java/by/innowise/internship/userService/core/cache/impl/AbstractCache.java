@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -19,6 +20,7 @@ public abstract class AbstractCache<T> implements CacheBase<T> {
     private final CacheManager cacheManager;
     private final CacheValidator validator;
 
+    @Transactional
     @Override
     public Optional<T> readFromCache(CacheType cacheType, String key) {
         String cacheName = cacheType.getCacheName();
@@ -30,6 +32,7 @@ public abstract class AbstractCache<T> implements CacheBase<T> {
                        .map(value -> (T) value);
     }
 
+    @Transactional
     @Override
     public void updateCache(CacheType cacheType, String key, T value) {
         String cacheName = cacheType.getCacheName();
@@ -39,6 +42,7 @@ public abstract class AbstractCache<T> implements CacheBase<T> {
         log.info("Cache for the key: {} was updated with a value: {}", key, value);
     }
 
+    @Transactional
     @Override
     public void removeFromCache(CacheType cacheType, String key) {
         String cacheName = cacheType.getCacheName();
@@ -48,6 +52,7 @@ public abstract class AbstractCache<T> implements CacheBase<T> {
         log.info("The key: {} was removed", String.join("::", cacheName, key));
     }
 
+    @Transactional
     @Override
     public void invalidateCache(CacheType cacheType) {
         String cacheName = cacheType.getCacheName();
@@ -57,7 +62,7 @@ public abstract class AbstractCache<T> implements CacheBase<T> {
         log.info("Cache: [{}] was invalidated", cacheName);
     }
 
-    private Cache validateAndGet(String cacheName) {
+    protected Cache validateAndGet(String cacheName) {
         validator.validate(getCacheSetName(), cacheName);
         return cacheManager.getCache(cacheName);
     }

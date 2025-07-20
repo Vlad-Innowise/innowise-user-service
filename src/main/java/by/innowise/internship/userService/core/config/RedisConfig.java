@@ -48,6 +48,8 @@ public class RedisConfig {
         PolymorphicTypeValidator ptv =
                 BasicPolymorphicTypeValidator.builder()
                                              .allowIfSubType("by.innowise")
+                                             .allowIfSubType("java.util")
+                                             .allowIfSubType("java.time")
                                              .build();
 
         builder.postConfigurer(redisMapper -> {

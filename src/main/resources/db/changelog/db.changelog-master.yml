@@ -1,1 +1,31 @@
 databaseChangeLog:
+
+  - include:
+      file: changeset/db.changelog-20250629_001_create-users-table.sql
+      relativeToChangelogFile: true
+      logicalFilePath: create-users-table.sql
+
+  - include:
+      file: changeset/db.changelog-20250629_002_create-card_info-table.sql
+      relativeToChangelogFile: true
+      logicalFilePath: create-card_info-table.sql
+
+  - include:
+      file: changeset/db.changelog-20250630_003-create-card_info-user_id_idx.sql
+      relativeToChangelogFile: true
+      logicalFilePath: create-card_info-user_id_idx.sql
+
+  - include:
+      file: changeset/db.changelog-20250708_004-users-add-created_at-updated_at-columns.sql
+      relativeToChangelogFile: true
+      logicalFilePath: users-add-created_at-updated_at-columns.sql
+
+  - include:
+      file: changeset/db.changelog-20250708_005-card_infos-add-created_at-updated_at-columns.sql
+      relativeToChangelogFile: true
+      logicalFilePath: card_infos-add-created_at-updated_at-columns.sql
+
+  - include:
+      file: changeset/db.changelog-20250709_006-added-version-column.sql
+      relativeToChangelogFile: true
+      logicalFilePath: added-version-column.sql

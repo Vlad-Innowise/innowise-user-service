@@ -5,6 +5,13 @@ spring:
   profiles:
     active: 'local'
 
+  data:
+    web:
+      pageable:
+        default-page-size: '5'
+        max-page-size: '50'
+        one-indexed-parameters: 'true'
+
   datasource:
     driverClassName: 'org.postgresql.Driver'
     hikari:

@@ -35,6 +35,7 @@ logging:
   level:
     root: 'info'
 
+# Custom properties
 application:
   cache:
     redis:

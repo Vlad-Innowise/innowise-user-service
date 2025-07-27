@@ -1,5 +1,7 @@
 package by.innowise.internship.userService.core.cache.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -7,6 +9,8 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Data
+@AllArgsConstructor
+@Builder
 public class UserCacheDto implements Serializable {
 
     Long id;

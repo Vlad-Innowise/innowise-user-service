@@ -1,5 +1,7 @@
 package by.innowise.internship.userService.core.cache.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -7,6 +9,8 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 @Data
+@AllArgsConstructor
+@Builder
 public class CardCacheDto implements Serializable {
 
     private UUID id;

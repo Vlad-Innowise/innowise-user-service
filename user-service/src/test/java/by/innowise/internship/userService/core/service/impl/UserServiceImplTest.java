@@ -110,7 +110,7 @@ class UserServiceImplTest {
         doNothing().when(userCacheService).updateCache(any(CacheType.class), any(String.class),
                                                        any(UserCacheDto.class));
 
-        UserResponseDto expectedResult = TestUtil.getUserResponseDto(userWithNoCards);
+        UserResponseDto expectedResult = TestUtil.mapToUserResponseDto(userWithNoCards);
         when(mapper.toDto(userWithNoCards)).thenReturn(expectedResult);
 
         UserResponseDto actualResult = userService.create(userCreateDto);
@@ -185,7 +185,7 @@ class UserServiceImplTest {
         UserCacheDto cacheDto = TestUtil.mapToUserRedisDto(userWithSeveralCards);
         when(mapper.toRedisDto(userWithSeveralCards)).thenReturn(cacheDto);
         doNothing().when(userCacheService).updateCache(eq(UserCache.BY_ID), any(String.class), eq(cacheDto));
-        UserResponseDto expectedResult = TestUtil.getUserResponseDto(userWithSeveralCards);
+        UserResponseDto expectedResult = TestUtil.mapToUserResponseDto(userWithSeveralCards);
         when(mapper.toDto(userWithSeveralCards)).thenReturn(expectedResult);
 
         UserResponseDto actualResult = userService.getById(userId);
@@ -209,7 +209,7 @@ class UserServiceImplTest {
         UserCacheDto userCachedDto = TestUtil.mapToUserRedisDto(userWithSeveralCards);
         when(userCacheService.readFromCache(eq(UserCache.BY_ID), any(String.class))).thenReturn(
                 Optional.of(userCachedDto));
-        UserResponseDto expectedResult = TestUtil.getUserResponseDtoFromRedisDto(userCachedDto);
+        UserResponseDto expectedResult = TestUtil.mapToUserResponseDtoFromRedisDto(userCachedDto);
         when(mapper.toDto(eq(userCachedDto))).thenReturn(expectedResult);
 
         UserResponseDto actualResult = userService.getById(userId);
@@ -265,9 +265,9 @@ class UserServiceImplTest {
 
         List<User> foundUsers = List.of(userWithNoCards, userWithSeveralCards);
         when(userRepository.findByIdIn(new HashSet<>(ids))).thenReturn(foundUsers);
-        UserResponseDto userWithNoCardsResponse = TestUtil.getUserResponseDto(userWithNoCards);
+        UserResponseDto userWithNoCardsResponse = TestUtil.mapToUserResponseDto(userWithNoCards);
         when(mapper.toDto(userWithNoCards)).thenReturn(userWithNoCardsResponse);
-        UserResponseDto userWithSeveralCardsResponse = TestUtil.getUserResponseDto(userWithSeveralCards);
+        UserResponseDto userWithSeveralCardsResponse = TestUtil.mapToUserResponseDto(userWithSeveralCards);
         when(mapper.toDto(userWithSeveralCards)).thenReturn(userWithSeveralCardsResponse);
         List<UserResponseDto> expectedResult = List.of(userWithNoCardsResponse, userWithSeveralCardsResponse);
 
@@ -316,7 +316,7 @@ class UserServiceImplTest {
         doNothing().when(userCacheService).updateCache(any(CacheType.class), any(String.class),
                                                        any(UserCacheDto.class));
 
-        UserResponseDto expectedResult = TestUtil.getUserResponseDto(updated);
+        UserResponseDto expectedResult = TestUtil.mapToUserResponseDto(updated);
         when(mapper.toDto(updated)).thenReturn(expectedResult);
 
         UserResponseDto actualResult = userService.update(updateDto, userId);
@@ -347,7 +347,7 @@ class UserServiceImplTest {
                                                     initUser.getEmail(), initUser.getVersion());
 
         when(userRepository.findByIdWithAllCards(userId)).thenReturn(Optional.of(initUser));
-        UserResponseDto expectedResult = TestUtil.getUserResponseDto(initUser);
+        UserResponseDto expectedResult = TestUtil.mapToUserResponseDto(initUser);
         when(mapper.toDto(initUser)).thenReturn(expectedResult);
 
         UserResponseDto actualResult = userService.update(updateDto, userId);

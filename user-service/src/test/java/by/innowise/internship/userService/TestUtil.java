@@ -66,29 +66,29 @@ public class TestUtil {
         user.setEmail(dto.email());
     }
 
-    public static UserResponseDto getUserResponseDto(User user) {
+    public static UserResponseDto mapToUserResponseDto(User user) {
         List<CardInfoResponseDto> cardResponseDtos = user.getCards().stream()
-                                                         .map(TestUtil::getCardInfoResponseDto)
+                                                         .map(TestUtil::mapToCardInfoResponseDto)
                                                          .toList();
         return new UserResponseDto(user.getId(), user.getName(), user.getSurname(), user.getBirthDate(),
                                    user.getEmail(), user.getVersion(), cardResponseDtos);
     }
 
-    public static CardInfoResponseDto getCardInfoResponseDto(CardInfo card) {
+    public static CardInfoResponseDto mapToCardInfoResponseDto(CardInfo card) {
         return new CardInfoResponseDto(card.getId(), card.getNumber(), card.getHolder(), card.getExpirationDate(),
                                        card.getUser().getId(), card.getVersion()
         );
     }
 
-    public static UserResponseDto getUserResponseDtoFromRedisDto(UserCacheDto cached) {
+    public static UserResponseDto mapToUserResponseDtoFromRedisDto(UserCacheDto cached) {
         List<CardInfoResponseDto> cardResponseDtos = cached.getCards().stream()
-                                                           .map(TestUtil::getCardInfoResponseDtoFromRedisDto)
+                                                           .map(TestUtil::mapToCardInfoResponseDtoFromRedisDto)
                                                            .toList();
         return new UserResponseDto(cached.getId(), cached.getName(), cached.getSurname(), cached.getBirthDate(),
                                    cached.getEmail(), cached.getVersion(), cardResponseDtos);
     }
 
-    public static CardInfoResponseDto getCardInfoResponseDtoFromRedisDto(CardCacheDto cached) {
+    public static CardInfoResponseDto mapToCardInfoResponseDtoFromRedisDto(CardCacheDto cached) {
         return new CardInfoResponseDto(cached.getId(), cached.getNumber(), cached.getHolder(),
                                        cached.getExpirationDate(),
                                        cached.getUserId(), cached.getVersion()

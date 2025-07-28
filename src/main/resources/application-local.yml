@@ -1,8 +1,0 @@
-spring:
-  datasource:
-    url: 'jdbc:postgresql://localhost:5432/user-service-db'
-    username: 'postgres'
-    password: 'postgres'
-
-server:
-  port: '8080'

@@ -1,0 +1,46 @@
+services:
+
+  user-service:
+    build: ./user-service
+    environment:
+      SPRING_PROFILES_ACTIVE: "${APPLICATION_PROFILE}"
+      DB_URL: "jdbc:postgresql://user-service-db:5432/${USER_SERVICE_DB_NAME}"
+      DB_USER: "${USER_SERVICE_DB_USER}"
+      DB_PASSWORD: "${USER_SERVICE_DB_PASSWORD}"
+      REDIS_HOST: "redis-db"
+      REDIS_PORT: '6379'
+      JAVA_TOOL_OPTIONS: '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5000'
+    ports:
+      - '8080:8080'
+      - '5000:5000'
+    expose:
+      - '8080' # application api
+      - '5000' # debug
+    restart: 'always'
+    depends_on:
+      - 'user-service-db'
+      - 'redis-db'
+
+  user-service-db:
+    image: 'postgres:17-alpine'
+    environment:
+      POSTGRES_USER: "${USER_SERVICE_DB_USER}"
+      POSTGRES_PASSWORD: "${USER_SERVICE_DB_PASSWORD}"
+      POSTGRES_DB: "${USER_SERVICE_DB_NAME}"
+    ports:
+      - '8888:5432'
+    volumes:
+      - 'pg-user-service-vol:/var/lib/postgresql/data'
+    restart: 'always'
+
+  redis-db:
+    image: 'redis:7.2.10-alpine'
+    ports:
+      - '6379:6379'
+    volumes:
+      - 'redis-user-service-vol:/data'
+    restart: 'always'
+
+volumes:
+  pg-user-service-vol:
+  redis-user-service-vol:

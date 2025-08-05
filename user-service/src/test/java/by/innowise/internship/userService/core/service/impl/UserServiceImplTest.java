@@ -274,7 +274,7 @@ class UserServiceImplTest {
         List<UserResponseDto> actualResult = userService.getAllByIds(ids);
 
         assertEquals(expectedResult.size(), actualResult.size());
-        assertThat(actualResult).hasSameElementsAs(expectedResult);
+        assertThat(actualResult).containsExactlyInAnyOrderElementsOf(expectedResult);
         verify(userRepository, times(1)).findByIdIn(anySet());
         verify(mapper, times(expectedResult.size())).toDto(any(User.class));
     }

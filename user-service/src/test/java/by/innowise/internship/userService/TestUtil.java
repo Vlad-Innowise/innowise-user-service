@@ -1,6 +1,7 @@
 package by.innowise.internship.userService;
 
 import by.innowise.internship.userService.api.dto.cardInfo.CardInfoResponseDto;
+import by.innowise.internship.userService.api.dto.cardInfo.CardInfoUpdateDto;
 import by.innowise.internship.userService.api.dto.user.UserCreateDto;
 import by.innowise.internship.userService.api.dto.user.UserResponseDto;
 import by.innowise.internship.userService.api.dto.user.UserUpdateDto;
@@ -85,6 +86,12 @@ public class TestUtil {
         user.setSurname(dto.surname());
         user.setBirthDate(dto.birthDate());
         user.setEmail(dto.email());
+    }
+
+    public static void updateCard(CardInfoUpdateDto dto, CardInfo entity) {
+        entity.setNumber(dto.number());
+        entity.setHolder(dto.holder());
+        entity.setExpirationDate(dto.expirationDate());
     }
 
     public static UserResponseDto mapToUserResponseDto(User user) {

@@ -11,6 +11,7 @@ import by.innowise.internship.userService.core.repository.entity.User;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -45,18 +46,38 @@ public class TestUtil {
         return new UserCreateDto(user.getName(), user.getSurname(), user.getBirthDate(), user.getEmail());
     }
 
-    public static User copyUser(User user) {
-        return User.builder()
-                   .id(user.getId())
-                   .name(user.getName())
-                   .surname(user.getSurname())
-                   .birthDate(user.getBirthDate())
-                   .email(user.getEmail())
-                   .cards(user.getCards())
-                   .createdAt(user.getCreatedAt())
-                   .updatedAt(user.getUpdatedAt())
-                   .version(user.getVersion())
-                   .build();
+    public static User deepCopyUser(User user) {
+        User copiedUser = User.builder()
+                              .id(user.getId())
+                              .name(user.getName())
+                              .surname(user.getSurname())
+                              .birthDate(user.getBirthDate())
+                              .email(user.getEmail())
+                              .cards(new ArrayList<>())
+                              .createdAt(user.getCreatedAt())
+                              .updatedAt(user.getUpdatedAt())
+                              .version(user.getVersion())
+                              .build();
+
+        user.getCards().forEach(card -> {
+            CardInfo copiedCard = copyCard(card);
+            copiedCard.setUser(copiedUser);
+            copiedUser.addCard(copiedCard);
+        });
+        return copiedUser;
+    }
+
+    public static CardInfo copyCard(CardInfo card) {
+        return CardInfo.builder()
+                       .id(card.getId())
+                       .number(card.getNumber())
+                       .holder(card.getHolder())
+                       .expirationDate(card.getExpirationDate())
+                       .user(card.getUser())
+                       .version(card.getVersion())
+                       .createdAt(card.getCreatedAt())
+                       .updatedAt(card.getUpdatedAt())
+                       .build();
     }
 
     public static void updateUser(UserUpdateDto dto, User user) {

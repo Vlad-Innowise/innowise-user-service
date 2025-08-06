@@ -99,7 +99,7 @@ class UserServiceImplTest {
 
         UserCreateDto userCreateDto = TestUtil.getUserCreateDtoFromUser(userWithNoCards);
 
-        User toSave = TestUtil.copyUser(userWithNoCards);
+        User toSave = TestUtil.deepCopyUser(userWithNoCards);
         toSave.setId(null);
         toSave.setCreatedAt(null);
         toSave.setUpdatedAt(null);
@@ -302,7 +302,7 @@ class UserServiceImplTest {
         when(userRepository.findByIdWithAllCards(userId)).thenReturn(Optional.of(initUser));
         when(userRepository.findByEmail(updateDto.email())).thenReturn(Optional.empty());
 
-        User updated = TestUtil.copyUser(initUser);
+        User updated = TestUtil.deepCopyUser(initUser);
         TestUtil.updateUser(updateDto, updated);
         when(mapper.updateEntity(updateDto, initUser)).thenReturn(updated);
 

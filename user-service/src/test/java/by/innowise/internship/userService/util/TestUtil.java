@@ -1,4 +1,4 @@
-package by.innowise.internship.userService;
+package by.innowise.internship.userService.util;
 
 import by.innowise.internship.userService.api.dto.cardInfo.CardInfoResponseDto;
 import by.innowise.internship.userService.api.dto.cardInfo.CardInfoUpdateDto;

@@ -1,6 +1,6 @@
 package by.innowise.internship.userService.core.service.impl;
 
-import by.innowise.internship.userService.TestUtil;
+import by.innowise.internship.userService.util.TestUtil;
 import by.innowise.internship.userService.api.dto.cardInfo.CardInfoCreateDto;
 import by.innowise.internship.userService.api.dto.cardInfo.CardInfoResponseDto;
 import by.innowise.internship.userService.api.dto.cardInfo.CardInfoUpdateDto;

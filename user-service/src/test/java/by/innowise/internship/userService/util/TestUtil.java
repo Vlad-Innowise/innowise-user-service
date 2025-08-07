@@ -25,6 +25,7 @@ public class TestUtil {
                    .surname(surname)
                    .birthDate(birthDate)
                    .email(email)
+                   .cards(new ArrayList<>())
                    .createdAt(LocalDateTime.now())
                    .updatedAt(LocalDateTime.now())
                    .version(0L)

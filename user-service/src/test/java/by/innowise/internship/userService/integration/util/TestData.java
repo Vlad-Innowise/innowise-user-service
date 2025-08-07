@@ -20,7 +20,7 @@ public class TestData {
     static {
 
         FRODO_BAGGINS = TestUtil.getUser(1L, "Frodo", "Baggins", LocalDate.of(1997, 7, 7), "frodo_baggins@email.com");
-        SAMWISE_GAMPGIE = TestUtil.getUser(2L, "Samwise", "Gampgie", LocalDate.of(1999, 11, 11),
+        SAMWISE_GAMPGIE = TestUtil.getUser(2L, "Samwise", "Gampgie", LocalDate.of(1999, 11, 1),
                                            "sam_gampgie@email.com");
         ARYA_STARK = TestUtil.getUser(3L, "Arya", "Stark", LocalDate.of(1993, 1, 1), "arya_stark@email.com");
 

@@ -371,7 +371,6 @@ class CardServiceImplTest {
             doReturn(new PageImpl<>(testUser.getCards(), pageable, testUser.getCards().size()))
                     .when(cardRepository).findAllByUserId(usedId, pageable);
 
-            System.out.println("Test users cards: " + testUser.getCards());
             CardInfoResponseDto firstCardDto = TestUtil.mapToCardInfoResponseDto(testUser.getCards().getFirst());
             doReturn(firstCardDto).when(mapper).toDto(testUser.getCards().getFirst());
             CardInfoResponseDto secondCardDto = TestUtil.mapToCardInfoResponseDto(testUser.getCards().getLast());
@@ -441,6 +440,7 @@ class CardServiceImplTest {
 
     }
 
+    @DisplayName("testing update() method")
     @Nested
     class update {
 

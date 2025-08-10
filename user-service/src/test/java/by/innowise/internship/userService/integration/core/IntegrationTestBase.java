@@ -1,6 +1,5 @@
 package by.innowise.internship.userService.integration.core;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -27,8 +26,7 @@ public abstract class IntegrationTestBase {
     private static final GenericContainer redis =
             new GenericContainer("redis:7.2.10-alpine").withExposedPorts(6379);
 
-    @BeforeAll
-    static void startContainer() {
+    static {
         postgres.start();
         redis.start();
     }

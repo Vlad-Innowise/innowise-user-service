@@ -89,7 +89,7 @@ public class UserServiceImpl implements UserService, InternalUserService {
 
             String emailToCheck = dto.email();
             log.info("Check if the provided email doesn't exists [{}]", emailToCheck);
-            if (!Objects.equals(emailToCheck, foundById.getEmail())) {
+            if (hasEmailChanged(emailToCheck, foundById)) {
                 userRepository.findByEmail(emailToCheck)
                               .ifPresent(user -> {
                                   throw new UniqueConstraintViolationException(
@@ -107,6 +107,10 @@ public class UserServiceImpl implements UserService, InternalUserService {
             updated = foundById;
         }
         return mapper.toDto(updated);
+    }
+
+    private boolean hasEmailChanged(String emailToCheck, User foundById) {
+        return !foundById.getEmail().equalsIgnoreCase(emailToCheck);
     }
 
     @Transactional

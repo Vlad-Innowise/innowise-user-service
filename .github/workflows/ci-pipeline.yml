@@ -83,4 +83,6 @@ jobs:
           path: target/
 
       - name: Build Docker Image
-        run: docker build -t user-service-image .
+        run: |
+          cd user-service
+          docker build -t user-service-image .

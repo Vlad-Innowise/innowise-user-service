@@ -30,6 +30,12 @@ jobs:
             user-service/target/*.jar
             !user-service/target/*.jar.original
 
+      - name: upload compiled classes
+        uses: actions/upload-artifact@v4
+        with:
+          name: compiled-classes
+          path: user-service/target/classes
+
   sonarqube:
     runs-on: ubuntu-latest
     needs: build-and-test
@@ -45,6 +51,12 @@ jobs:
           distribution: temurin
           java-version: 21
           cache: maven
+
+      - name: Download compiled classes
+        uses: actions/download-artifact@v4
+        with:
+          name: compiled-classes
+          path: user-service/target/classes
 
       - name: SonarQube analyze
         uses: SonarSource/sonarqube-scan-action@v4

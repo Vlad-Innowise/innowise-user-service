@@ -59,7 +59,7 @@ jobs:
           path: user-service/target/classes
 
       - name: SonarQube analyze
-        uses: SonarSource/sonarqube-scan-action@v4
+        uses: SonarSource/sonarqube-scan-action@v5.3.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:

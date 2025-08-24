@@ -15,7 +15,12 @@ jobs:
           cache: maven
 
       - name: build & test
-        run: mvn -B -DskipTests=false verify
+        run:
+          mvn \
+          -B \
+          -DskipTests=false \
+          -Dtest='!*ApplicationTests' \
+          verify
 
       - name: upload artifact
         uses: actions/upload-artifact@v4

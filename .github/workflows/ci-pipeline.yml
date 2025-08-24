@@ -27,8 +27,8 @@ jobs:
         with:
           name: java-application
           path: |
-            target/*.jar
-            !target/*.jar.original
+            user-service/target/*.jar
+            !user-service/target/*.jar.original
 
   sonarqube:
     runs-on: ubuntu-latest
@@ -44,6 +44,6 @@ jobs:
         with:
           args: >
             -Dsonar.organization=vlad-innowise
-            -Dsonar.projectKey=vlad-innowise_innowise-user-service
+            -Dsonar.projectKey=Vlad-Innowise_innowise-user-service
             -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.login=${{ secrets.SONAR_TOKEN }}

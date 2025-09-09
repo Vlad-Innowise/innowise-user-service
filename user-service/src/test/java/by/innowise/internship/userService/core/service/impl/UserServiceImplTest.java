@@ -1,6 +1,5 @@
 package by.innowise.internship.userService.core.service.impl;
 
-import by.innowise.internship.userService.util.TestUtil;
 import by.innowise.internship.userService.api.dto.user.UserCreateDto;
 import by.innowise.internship.userService.api.dto.user.UserResponseDto;
 import by.innowise.internship.userService.api.dto.user.UserUpdateDto;
@@ -17,6 +16,7 @@ import by.innowise.internship.userService.core.repository.UserRepository;
 import by.innowise.internship.userService.core.repository.entity.CardInfo;
 import by.innowise.internship.userService.core.repository.entity.User;
 import by.innowise.internship.userService.core.util.validation.ValidationUtil;
+import by.innowise.internship.userService.util.TestUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -79,13 +79,13 @@ class UserServiceImplTest {
     @BeforeEach
     void init() {
         this.userWithNoCards = TestUtil.getUser(1L, "Test", "No_Cards", LocalDate.of(1980, 1, 10),
-                                                "no_cards@email.com");
+                                                "no_cards@email.com", 1L);
         List<CardInfo> cards = List.of(
                 TestUtil.getCard("4444555566667777", "Test_2 With_Several_Cards", LocalDate.of(2030, 10, 31)),
                 TestUtil.getCard("6666777788889999", "Test_2 With_Several_Cards", LocalDate.of(2029, 6, 30))
         );
         this.userWithSeveralCards = TestUtil.getUser(2L, "Test_2", "With_Several_Cards", LocalDate.of(1990, 12, 13),
-                                                     "several_cards@email.com"
+                                                     "several_cards@email.com", 2L
         );
         cards.forEach(c -> {
             c.setUser(userWithSeveralCards);

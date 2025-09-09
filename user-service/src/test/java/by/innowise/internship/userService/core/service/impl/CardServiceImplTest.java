@@ -106,7 +106,7 @@ class CardServiceImplTest {
                 CARD_TO_MANIPULATE);
 
         USER_WITH_SEVERAL_CARDS = TestUtil.getUser(2L, "Test_2", "With_Several_Cards", LocalDate.of(1990, 12, 13),
-                                                   "several_cards@email.com");
+                                                   "several_cards@email.com", 2L);
 
         cards.forEach(c -> {
             c.setUser(USER_WITH_SEVERAL_CARDS);

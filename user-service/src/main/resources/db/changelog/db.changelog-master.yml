@@ -29,3 +29,13 @@ databaseChangeLog:
       file: changeset/db.changelog-20250709_006-added-version-column.sql
       relativeToChangelogFile: true
       logicalFilePath: added-version-column.sql
+
+  - include:
+      file: changeset/db.changelog-20250909_007-added-auth-id-column.sql
+      relativeToChangelogFile: true
+      logicalFilePath: added-auth-id-column
+
+  - include:
+      file: changeset/db.changelog-20250909_008-set-not-null-to-auth-id-column.sql
+      relativeToChangelogFile: true
+      logicalFilePath: set-not-null-to-auth-id-column

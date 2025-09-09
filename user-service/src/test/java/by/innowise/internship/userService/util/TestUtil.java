@@ -18,7 +18,7 @@ import java.util.UUID;
 
 public class TestUtil {
 
-    public static User getUser(Long id, String name, String surname, LocalDate birthDate, String email) {
+    public static User getUser(Long id, String name, String surname, LocalDate birthDate, String email, Long authId) {
         return User.builder()
                    .id(id)
                    .name(name)
@@ -29,6 +29,7 @@ public class TestUtil {
                    .createdAt(LocalDateTime.now())
                    .updatedAt(LocalDateTime.now())
                    .version(0L)
+                   .authId(authId)
                    .build();
     }
 
@@ -59,6 +60,7 @@ public class TestUtil {
                               .createdAt(user.getCreatedAt())
                               .updatedAt(user.getUpdatedAt())
                               .version(user.getVersion())
+                              .authId(user.getAuthId())
                               .build();
 
         user.getCards().forEach(card -> {

@@ -1,8 +1,8 @@
-INSERT INTO app.users(id, name, surname, birth_date, email, version, created_at, updated_at)
+INSERT INTO app.users(id, name, surname, birth_date, email, version, created_at, updated_at, auth_id)
 VALUES
-(1, 'Frodo', 'Baggins', '1997-07-07', 'frodo_baggins@email.com', 0, '2025-08-07 19:30:00', '2025-08-07 19:30:00'),
-(2, 'Samwise', 'Gampgie', '1999-11-01', 'sam_gampgie@email.com', 0, '2025-08-07 19:30:00', '2025-08-07 19:30:00'),
-(3, 'Arya', 'Stark', '1993-01-01', 'arya_stark@email.com', 0, '2025-08-07 19:30:00', '2025-08-07 19:30:00');
+(1, 'Frodo', 'Baggins', '1997-07-07', 'frodo_baggins@email.com', 0, '2025-08-07 19:30:00', '2025-08-07 19:30:00',1),
+(2, 'Samwise', 'Gampgie', '1999-11-01', 'sam_gampgie@email.com', 0, '2025-08-07 19:30:00', '2025-08-07 19:30:00',2),
+(3, 'Arya', 'Stark', '1993-01-01', 'arya_stark@email.com', 0, '2025-08-07 19:30:00', '2025-08-07 19:30:00',3);
 
 SELECT SETVAL('users_id_seq', (SELECT MAX(id) FROM app.users));
 

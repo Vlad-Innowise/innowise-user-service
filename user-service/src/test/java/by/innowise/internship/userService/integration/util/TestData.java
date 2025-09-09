@@ -19,10 +19,10 @@ public class TestData {
 
     static {
 
-        FRODO_BAGGINS = TestUtil.getUser(1L, "Frodo", "Baggins", LocalDate.of(1997, 7, 7), "frodo_baggins@email.com");
+        FRODO_BAGGINS = TestUtil.getUser(1L, "Frodo", "Baggins", LocalDate.of(1997, 7, 7), "frodo_baggins@email.com", 1L);
         SAMWISE_GAMPGIE = TestUtil.getUser(2L, "Samwise", "Gampgie", LocalDate.of(1999, 11, 1),
-                                           "sam_gampgie@email.com");
-        ARYA_STARK = TestUtil.getUser(3L, "Arya", "Stark", LocalDate.of(1993, 1, 1), "arya_stark@email.com");
+                                           "sam_gampgie@email.com",2L);
+        ARYA_STARK = TestUtil.getUser(3L, "Arya", "Stark", LocalDate.of(1993, 1, 1), "arya_stark@email.com",3L);
 
         CardInfo frodoCard1 = TestUtil.getCard("2222444499991111", "FRODO BAGGINS", LocalDate.of(2025, 12, 31));
         frodoCard1.setId(UUID.fromString("cbf7e645-523c-458e-a4bc-c8c01bb3d82a"));

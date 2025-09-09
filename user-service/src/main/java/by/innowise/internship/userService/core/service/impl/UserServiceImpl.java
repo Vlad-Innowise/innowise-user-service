@@ -1,5 +1,8 @@
 package by.innowise.internship.userService.core.service.impl;
 
+import by.innowise.common.library.exception.UniqueConstraintViolationException;
+import by.innowise.common.library.exception.UserNotFoundException;
+import by.innowise.common.library.util.ValidationUtil;
 import by.innowise.internship.userService.api.dto.user.UserCreateDto;
 import by.innowise.internship.userService.api.dto.user.UserResponseDto;
 import by.innowise.internship.userService.api.dto.user.UserUpdateDto;
@@ -7,14 +10,11 @@ import by.innowise.internship.userService.core.cache.CacheUtil;
 import by.innowise.internship.userService.core.cache.UserCacheService;
 import by.innowise.internship.userService.core.cache.dto.UserCacheDto;
 import by.innowise.internship.userService.core.cache.supportedCaches.UserCache;
-import by.innowise.internship.userService.core.exception.UniqueConstraintViolationException;
-import by.innowise.internship.userService.core.exception.UserNotFoundException;
 import by.innowise.internship.userService.core.mapper.UserMapper;
 import by.innowise.internship.userService.core.repository.UserRepository;
 import by.innowise.internship.userService.core.repository.entity.User;
 import by.innowise.internship.userService.core.service.api.InternalUserService;
 import by.innowise.internship.userService.core.service.api.UserService;
-import by.innowise.internship.userService.core.util.validation.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -33,7 +33,6 @@ public class UserServiceImpl implements UserService, InternalUserService {
 
     private final UserRepository userRepository;
     private final UserMapper mapper;
-    private final ValidationUtil validationUtil;
     private final UserCacheService userCacheService;
     private final CacheUtil cacheUtil;
 
@@ -84,7 +83,7 @@ public class UserServiceImpl implements UserService, InternalUserService {
         User updated;
         if (hasAnyFieldChanged(dto, foundById)) {
             log.info("Check if the provided dto version is not outdated. Dto: [{}] Entity: [{}]", dto, foundById);
-            validationUtil.checkIfDtoVersionIsOutdated(foundById.getVersion(), dto);
+            ValidationUtil.checkIfDtoVersionIsOutdated(foundById.getVersion(), dto);
 
 
             String emailToCheck = dto.email();

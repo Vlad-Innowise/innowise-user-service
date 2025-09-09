@@ -1,9 +1,9 @@
 package by.innowise.internship.userService.api.advice;
 
-import by.innowise.internship.userService.api.dto.exception.ComplexExceptionDto;
-import by.innowise.internship.userService.api.dto.exception.SimpleExceptionDto;
-import by.innowise.internship.userService.api.dto.exception.StructuredExceptionDto;
-import by.innowise.internship.userService.core.exception.ApplicationException;
+import by.innowise.common.library.exception.ApplicationException;
+import by.innowise.common.library.exception.dto.ComplexExceptionDto;
+import by.innowise.common.library.exception.dto.SimpleExceptionDto;
+import by.innowise.common.library.exception.dto.StructuredExceptionDto;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

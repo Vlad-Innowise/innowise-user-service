@@ -1,6 +1,7 @@
 package by.innowise.internship.userService.core.service.impl;
 
-import by.innowise.internship.userService.util.TestUtil;
+import by.innowise.common.library.exception.UpdateDtoVersionOutdatedException;
+import by.innowise.common.library.exception.UserNotFoundException;
 import by.innowise.internship.userService.api.dto.cardInfo.CardInfoCreateDto;
 import by.innowise.internship.userService.api.dto.cardInfo.CardInfoResponseDto;
 import by.innowise.internship.userService.api.dto.cardInfo.CardInfoUpdateDto;
@@ -12,14 +13,12 @@ import by.innowise.internship.userService.core.cache.supportedCaches.CacheType;
 import by.innowise.internship.userService.core.cache.supportedCaches.CardCache;
 import by.innowise.internship.userService.core.exception.CardNotFoundException;
 import by.innowise.internship.userService.core.exception.IllegalCardUpdateRequestException;
-import by.innowise.internship.userService.core.exception.UpdateDtoVersionOutdatedException;
-import by.innowise.internship.userService.core.exception.UserNotFoundException;
 import by.innowise.internship.userService.core.mapper.CardInfoMapper;
 import by.innowise.internship.userService.core.repository.CardInfoRepository;
 import by.innowise.internship.userService.core.repository.entity.CardInfo;
 import by.innowise.internship.userService.core.repository.entity.User;
 import by.innowise.internship.userService.core.service.api.InternalUserService;
-import by.innowise.internship.userService.core.util.validation.ValidationUtil;
+import by.innowise.internship.userService.util.TestUtil;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -81,8 +80,6 @@ class CardServiceImplTest {
     private CardInfoMapper mapper;
     @Mock
     private InternalUserService internalUserService;
-    @Spy
-    private ValidationUtil validationUtil;
     @Mock
     private CardInfoCacheService cardInfoCacheService;
     @Spy
@@ -487,7 +484,6 @@ class CardServiceImplTest {
             assertThat(actualResult).isEqualTo(expectedResult);
 
             verify(cardRepository).findByIdAndUserId(any(UUID.class), anyLong());
-            verify(validationUtil).checkIfDtoVersionIsOutdated(anyLong(), any(CardInfoUpdateDto.class));
             verify(cardRepository).findByNumber(anyString());
             verify(mapper).updateEntity(any(CardInfoUpdateDto.class), any(CardInfo.class));
             verify(cardRepository).saveAndFlush(any(CardInfo.class));
@@ -520,7 +516,6 @@ class CardServiceImplTest {
 
             verify(cardRepository).findByIdAndUserId(any(UUID.class), anyLong());
             verify(mapper).toDto(any(CardInfo.class));
-            verifyNoInteractions(validationUtil, cacheUtil, cardInfoCacheService, userCacheInvalidator);
             verify(cardRepository, never()).findByNumber(anyString());
             verify(mapper, never()).updateEntity(any(CardInfoUpdateDto.class), any(CardInfo.class));
             verify(cardRepository, never()).saveAndFlush(any(CardInfo.class));
@@ -547,7 +542,6 @@ class CardServiceImplTest {
 
             assertThrowsExactly(IllegalCardUpdateRequestException.class, () -> cardService.update(updateDto, userId));
             verify(cardRepository).findByIdAndUserId(any(UUID.class), anyLong());
-            verify(validationUtil).checkIfDtoVersionIsOutdated(anyLong(), any(CardInfoUpdateDto.class));
             verify(cardRepository).findByNumber(anyString());
             verify(cardRepository, never()).saveAndFlush(any(CardInfo.class));
             verifyNoInteractions(mapper, cacheUtil, cardInfoCacheService, userCacheInvalidator);
@@ -571,7 +565,6 @@ class CardServiceImplTest {
 
             assertThrowsExactly(UpdateDtoVersionOutdatedException.class, () -> cardService.update(updateDto, userId));
             verify(cardRepository).findByIdAndUserId(any(UUID.class), anyLong());
-            verify(validationUtil).checkIfDtoVersionIsOutdated(anyLong(), any(CardInfoUpdateDto.class));
             verifyNoInteractions(mapper, cacheUtil, cardInfoCacheService, userCacheInvalidator);
             verify(cardRepository, never()).findByNumber(anyString());
             verify(cardRepository, never()).saveAndFlush(any(CardInfo.class));
@@ -593,7 +586,6 @@ class CardServiceImplTest {
 
             assertThrowsExactly(CardNotFoundException.class, () -> cardService.update(updateDto, userId));
             verify(cardRepository).findByIdAndUserId(any(UUID.class), anyLong());
-            verifyNoInteractions(validationUtil, mapper, cacheUtil, cardInfoCacheService, userCacheInvalidator);
             verify(cardRepository, never()).findByNumber(anyString());
             verify(cardRepository, never()).saveAndFlush(any(CardInfo.class));
         }

@@ -1,11 +1,11 @@
 package by.innowise.internship.userService.integration.service;
 
+import by.innowise.common.library.exception.UniqueConstraintViolationException;
+import by.innowise.common.library.exception.UpdateDtoVersionOutdatedException;
+import by.innowise.common.library.exception.UserNotFoundException;
 import by.innowise.internship.userService.api.dto.user.UserCreateDto;
 import by.innowise.internship.userService.api.dto.user.UserResponseDto;
 import by.innowise.internship.userService.api.dto.user.UserUpdateDto;
-import by.innowise.internship.userService.core.exception.UniqueConstraintViolationException;
-import by.innowise.internship.userService.core.exception.UpdateDtoVersionOutdatedException;
-import by.innowise.internship.userService.core.exception.UserNotFoundException;
 import by.innowise.internship.userService.core.repository.UserRepository;
 import by.innowise.internship.userService.core.repository.entity.User;
 import by.innowise.internship.userService.core.service.api.UserService;

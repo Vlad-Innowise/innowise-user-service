@@ -1,6 +1,6 @@
 package by.innowise.internship.userService.api.dto.user;
 
-import by.innowise.internship.userService.core.platform.api.Versionable;
+import by.innowise.common.library.util.Versionable;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

@@ -1,5 +1,8 @@
 package by.innowise.internship.userService.core.service.impl;
 
+import by.innowise.common.library.exception.UniqueConstraintViolationException;
+import by.innowise.common.library.exception.UpdateDtoVersionOutdatedException;
+import by.innowise.common.library.exception.UserNotFoundException;
 import by.innowise.internship.userService.api.dto.user.UserCreateDto;
 import by.innowise.internship.userService.api.dto.user.UserResponseDto;
 import by.innowise.internship.userService.api.dto.user.UserUpdateDto;
@@ -8,14 +11,10 @@ import by.innowise.internship.userService.core.cache.UserCacheService;
 import by.innowise.internship.userService.core.cache.dto.UserCacheDto;
 import by.innowise.internship.userService.core.cache.supportedCaches.CacheType;
 import by.innowise.internship.userService.core.cache.supportedCaches.UserCache;
-import by.innowise.internship.userService.core.exception.UniqueConstraintViolationException;
-import by.innowise.internship.userService.core.exception.UpdateDtoVersionOutdatedException;
-import by.innowise.internship.userService.core.exception.UserNotFoundException;
 import by.innowise.internship.userService.core.mapper.UserMapper;
 import by.innowise.internship.userService.core.repository.UserRepository;
 import by.innowise.internship.userService.core.repository.entity.CardInfo;
 import by.innowise.internship.userService.core.repository.entity.User;
-import by.innowise.internship.userService.core.util.validation.ValidationUtil;
 import by.innowise.internship.userService.util.TestUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -56,9 +55,6 @@ class UserServiceImplTest {
 
     @Mock
     private UserMapper mapper;
-
-    @Spy
-    private ValidationUtil validationUtil;
 
     @Mock
     private UserCacheService userCacheService;
@@ -323,7 +319,6 @@ class UserServiceImplTest {
 
         assertEquals(expectedResult, actualResult);
         verify(userRepository, times(1)).findByIdWithAllCards(anyLong());
-        verify(validationUtil, times(1)).checkIfDtoVersionIsOutdated(anyLong(), any(UserUpdateDto.class));
         verify(userRepository, times(1)).findByEmail(any(String.class));
         verify(mapper, times(1)).updateEntity(any(UserUpdateDto.class), any(User.class));
         verify(userRepository, times(1)).saveAndFlush(any(User.class));
@@ -353,7 +348,6 @@ class UserServiceImplTest {
         UserResponseDto actualResult = userService.update(updateDto, userId);
 
         assertEquals(expectedResult, actualResult);
-        verify(validationUtil, times(0)).checkIfDtoVersionIsOutdated(anyLong(), any(UserUpdateDto.class));
         verify(mapper, times(1)).toDto(userCaptor.capture());
 
         User returnedFromDb = userCaptor.getValue();
@@ -374,7 +368,6 @@ class UserServiceImplTest {
 
         assertThrowsExactly(UniqueConstraintViolationException.class, () -> userService.update(updateDto, userId));
         verify(userRepository, times(1)).findByIdWithAllCards(anyLong());
-        verify(validationUtil, times(1)).checkIfDtoVersionIsOutdated(anyLong(), any(UserUpdateDto.class));
         verify(userRepository, times(1)).findByEmail(any(String.class));
     }
 
@@ -392,7 +385,6 @@ class UserServiceImplTest {
 
         assertThrowsExactly(UpdateDtoVersionOutdatedException.class, () -> userService.update(updateDto, userId));
         verify(userRepository, times(1)).findByIdWithAllCards(anyLong());
-        verify(validationUtil, times(1)).checkIfDtoVersionIsOutdated(anyLong(), any(UserUpdateDto.class));
     }
 
     @Test

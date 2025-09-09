@@ -1,5 +1,6 @@
 package by.innowise.internship.userService.core.service.impl;
 
+import by.innowise.common.library.util.ValidationUtil;
 import by.innowise.internship.userService.api.dto.cardInfo.CardInfoCreateDto;
 import by.innowise.internship.userService.api.dto.cardInfo.CardInfoResponseDto;
 import by.innowise.internship.userService.api.dto.cardInfo.CardInfoUpdateDto;
@@ -16,7 +17,6 @@ import by.innowise.internship.userService.core.repository.entity.CardInfo;
 import by.innowise.internship.userService.core.repository.entity.User;
 import by.innowise.internship.userService.core.service.api.CardService;
 import by.innowise.internship.userService.core.service.api.InternalUserService;
-import by.innowise.internship.userService.core.util.validation.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -39,7 +39,6 @@ public class CardServiceImpl implements CardService {
     private final CardInfoRepository cardRepository;
     private final CardInfoMapper mapper;
     private final InternalUserService internalUserService;
-    private final ValidationUtil validationUtil;
     private final CardInfoCacheService cardInfoCacheService;
     private final CacheUtil cacheUtil;
     private final UserCacheInvalidator userCacheInvalidator;
@@ -113,7 +112,7 @@ public class CardServiceImpl implements CardService {
 
         if (hasAnyFieldChanged(dto, foundById)) {
             log.info("Check if the provided dto version is not outdated. Dto: [{}] Entity: [{}]", dto, foundById);
-            validationUtil.checkIfDtoVersionIsOutdated(foundById.getVersion(), dto);
+            ValidationUtil.checkIfDtoVersionIsOutdated(foundById.getVersion(), dto);
 
             log.info("Check if provided card number [{}] exists in the system and matches to requested card id [{}]",
                      dto.number(), dto.id());

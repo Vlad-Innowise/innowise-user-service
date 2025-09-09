@@ -1,6 +1,6 @@
 package by.innowise.internship.userService.core.repository.entity;
 
-import by.innowise.internship.userService.core.platform.api.Versionable;
+import by.innowise.common.library.util.Versionable;
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;

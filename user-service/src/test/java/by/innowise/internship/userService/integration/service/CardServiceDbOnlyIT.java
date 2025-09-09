@@ -1,12 +1,12 @@
 package by.innowise.internship.userService.integration.service;
 
+import by.innowise.common.library.exception.UpdateDtoVersionOutdatedException;
+import by.innowise.common.library.exception.UserNotFoundException;
 import by.innowise.internship.userService.api.dto.cardInfo.CardInfoCreateDto;
 import by.innowise.internship.userService.api.dto.cardInfo.CardInfoResponseDto;
 import by.innowise.internship.userService.api.dto.cardInfo.CardInfoUpdateDto;
 import by.innowise.internship.userService.core.exception.CardNotFoundException;
 import by.innowise.internship.userService.core.exception.IllegalCardUpdateRequestException;
-import by.innowise.internship.userService.core.exception.UpdateDtoVersionOutdatedException;
-import by.innowise.internship.userService.core.exception.UserNotFoundException;
 import by.innowise.internship.userService.core.repository.CardInfoRepository;
 import by.innowise.internship.userService.core.repository.entity.CardInfo;
 import by.innowise.internship.userService.core.service.api.CardService;

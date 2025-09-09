@@ -1,7 +1,7 @@
 package by.innowise.internship.userService.api.dto.user;
 
+import by.innowise.common.library.util.Versionable;
 import by.innowise.internship.userService.api.dto.cardInfo.CardInfoResponseDto;
-import by.innowise.internship.userService.core.platform.api.Versionable;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.LocalDate;

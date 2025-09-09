@@ -45,3 +45,6 @@ build/
 
 ### Log file ###
 *.log
+
+#ENV
+.env*

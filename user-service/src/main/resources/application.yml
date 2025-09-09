@@ -43,3 +43,6 @@ application:
   cache:
     redis:
       time-to-live-in-minutes: 5
+  security:
+    enabled: 'true'
+    secretKey: "${TOKEN_SECRET}"

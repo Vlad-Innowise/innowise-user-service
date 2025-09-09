@@ -24,12 +24,17 @@
         <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
         <testcontainers.version>1.21.3</testcontainers.version>
         <common-lib.version>1.0.0</common-lib.version>
+        <common-security-starter.version>1.1.5</common-security-starter.version>
     </properties>
 
     <repositories>
         <repository>
             <id>innowise-common-lib</id>
             <url>https://maven.pkg.github.com/Vlad-Innowise/common-lib</url>
+        </repository>
+        <repository>
+            <id>innowise-security-starter</id>
+            <url>https://maven.pkg.github.com/Vlad-Innowise/common-security-starter</url>
         </repository>
     </repositories>
 
@@ -66,6 +71,11 @@
                 <groupId>by.innowise.internship</groupId>
                 <artifactId>common-lib</artifactId>
                 <version>${common-lib.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>by.innowise.internship</groupId>
+                <artifactId>common-security-starter</artifactId>
+                <version>${common-security-starter.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

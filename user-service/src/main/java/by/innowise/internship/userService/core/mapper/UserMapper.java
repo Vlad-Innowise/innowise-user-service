@@ -20,14 +20,14 @@ public interface UserMapper {
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "version", ignore = true)
     @Mapping(target = "cards", ignore = true)
-    User toEntity(UserCreateDto dto);//, @Context Long authId
+    User toEntity(UserCreateDto dto, @Context Long authId);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "version", ignore = true)
     @Mapping(target = "cards", ignore = true)
-    User updateEntity(UserUpdateDto dto, @MappingTarget User entity);
+    User updateEntity(UserUpdateDto dto, @MappingTarget User entity, @Context Long authId);
 
     UserResponseDto toDto(User e);
 
@@ -35,9 +35,9 @@ public interface UserMapper {
 
     UserResponseDto toDto(UserCacheDto cacheDto);
 
-//    @AfterMapping
-//    default void mapAuthId(@MappingTarget User user, @Context Long authId) {
-//        user.setAuthId(authId);
-//    }
+    @AfterMapping
+    default void mapAuthId(@MappingTarget User user, @Context Long authId) {
+        user.setAuthId(authId);
+    }
 
 }

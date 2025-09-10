@@ -103,7 +103,7 @@ class CardServiceImplTest {
                 CARD_TO_MANIPULATE);
 
         USER_WITH_SEVERAL_CARDS = TestUtil.getUser(2L, "Test_2", "With_Several_Cards", LocalDate.of(1990, 12, 13),
-                                                   "several_cards@email.com", 2L);
+                                                   "several_cards@email.com", 22L);
 
         cards.forEach(c -> {
             c.setUser(USER_WITH_SEVERAL_CARDS);
@@ -133,7 +133,7 @@ class CardServiceImplTest {
         when(cardRepository.existsByNumber(cardNumber)).thenReturn(expectedResult);
 
         assertEquals(expectedResult, cardService.cardNumberExists(cardNumber));
-        verify(cardRepository, times(1)).existsByNumber(anyString());
+        verify(cardRepository).existsByNumber(anyString());
     }
 
     private List<UUID> generateMissingCardIds(int amount) {
@@ -156,14 +156,14 @@ class CardServiceImplTest {
         @Test
         void createHappyPass() {
 
-            long userId = testUser.getId();
+            long authId = testUser.getAuthId();
             CardInfoCreateDto createDto = new CardInfoCreateDto("88885555444433331111", "Test_2 With_Several_Cards",
                                                                 LocalDate.of(2027, 11, 30));
             CardInfo created = TestUtil.getCard(createDto.number(), createDto.holder(), createDto.expirationDate());
             created.setUser(testUser);
             testUser.getCards().add(created);
 
-            when(internalUserService.getUserById(userId)).thenReturn(testUser);
+            when(internalUserService.getUserByAuthId(authId)).thenReturn(testUser);
 
             CardInfo toSave = TestUtil.copyCard(created);
             toSave.setId(null);
@@ -176,35 +176,34 @@ class CardServiceImplTest {
             when(mapper.toRedisDto(created)).thenReturn(TestUtil.mapToCardRedisDto(created));
             doNothing().when(cardInfoCacheService).updateCache(any(CacheType.class), anyString(),
                                                                any(CardCacheDto.class));
-            doNothing().when(userCacheInvalidator).invalidate(userId);
+            doNothing().when(userCacheInvalidator).invalidate(authId);
 
             CardInfoResponseDto expectedResult = TestUtil.mapToCardInfoResponseDto(created);
             when(mapper.toDto(created)).thenReturn(expectedResult);
 
-            CardInfoResponseDto actualResult = cardService.create(createDto, userId);
+            CardInfoResponseDto actualResult = cardService.create(createDto, authId);
             assertEquals(expectedResult, actualResult);
-            verify(internalUserService, times(1)).getUserById(anyLong());
-            verify(mapper, times(1)).toEntity(any(CardInfoCreateDto.class), any(User.class));
-            verify(cardRepository, times(1)).saveAndFlush(any(CardInfo.class));
-            verify(cacheUtil, times(1)).composeKey(anyString(), any(UUID.class));
-            verify(mapper, times(1)).toRedisDto(any(CardInfo.class));
-            verify(cardInfoCacheService, times(1)).updateCache(any(CacheType.class), anyString(),
-                                                               any(CardCacheDto.class));
-            verify(userCacheInvalidator, times(1)).invalidate(anyLong());
-            verify(mapper, times(1)).toDto(any(CardInfo.class));
+            verify(internalUserService).getUserByAuthId(anyLong());
+            verify(mapper).toEntity(any(CardInfoCreateDto.class), any(User.class));
+            verify(cardRepository).saveAndFlush(any(CardInfo.class));
+            verify(cacheUtil).composeKey(anyString(), any(UUID.class));
+            verify(mapper).toRedisDto(any(CardInfo.class));
+            verify(cardInfoCacheService).updateCache(any(CacheType.class), anyString(), any(CardCacheDto.class));
+            verify(userCacheInvalidator).invalidate(anyLong());
+            verify(mapper).toDto(any(CardInfo.class));
         }
 
         @Test
         void createShouldThrowExceptionUserNotFound() {
 
-            long userId = 999L;
+            long authId = 999L;
             CardInfoCreateDto createDto = new CardInfoCreateDto("88885555444433331111", "Test_2 With_Several_Cards",
                                                                 LocalDate.of(2027, 11, 30));
 
-            when(internalUserService.getUserById(userId)).thenThrow(UserNotFoundException.class);
+            when(internalUserService.getUserByAuthId(authId)).thenThrow(UserNotFoundException.class);
 
-            assertThrowsExactly(UserNotFoundException.class, () -> cardService.create(createDto, userId));
-            verify(internalUserService, times(1)).getUserById(anyLong());
+            assertThrowsExactly(UserNotFoundException.class, () -> cardService.create(createDto, authId));
+            verify(internalUserService).getUserByAuthId(anyLong());
         }
     }
 
@@ -215,33 +214,32 @@ class CardServiceImplTest {
         @Test
         void getByIdPositiveReadFromDb() {
 
-            long userId = testUser.getId();
+            long authId = testUser.getAuthId();
             UUID cardId = testCard.getId();
 
             when(cardInfoCacheService.readFromCache(eq(CardCache.BY_ID), anyString())).thenReturn(Optional.empty());
-            when(cardRepository.findByIdAndUserId(cardId, userId)).thenReturn(Optional.of(testCard));
+            when(cardRepository.findByIdAndAuthUserId(cardId, authId)).thenReturn(Optional.of(testCard));
             when(mapper.toRedisDto(testCard)).thenReturn(TestUtil.mapToCardRedisDto(testCard));
             doNothing().when(cardInfoCacheService).updateCache(eq(CardCache.BY_ID), anyString(),
                                                                any(CardCacheDto.class));
             CardInfoResponseDto expectedResult = TestUtil.mapToCardInfoResponseDto(testCard);
             when(mapper.toDto(testCard)).thenReturn(expectedResult);
 
-            CardInfoResponseDto actualResult = cardService.getById(cardId, userId);
+            CardInfoResponseDto actualResult = cardService.getById(cardId, authId);
 
             assertEquals(expectedResult, actualResult);
             verify(cacheUtil, times(2)).composeKey(anyString(), any(UUID.class));
-            verify(cardInfoCacheService, times(1)).readFromCache(any(CacheType.class), anyString());
-            verify(cardRepository, times(1)).findByIdAndUserId(any(UUID.class), anyLong());
-            verify(mapper, times(1)).toRedisDto(any(CardInfo.class));
-            verify(cardInfoCacheService, times(1)).updateCache(any(CacheType.class), anyString(),
-                                                               any(CardCacheDto.class));
-            verify(mapper, times(1)).toDto(any(CardInfo.class));
+            verify(cardInfoCacheService).readFromCache(any(CacheType.class), anyString());
+            verify(cardRepository).findByIdAndAuthUserId(any(UUID.class), anyLong());
+            verify(mapper).toRedisDto(any(CardInfo.class));
+            verify(cardInfoCacheService).updateCache(any(CacheType.class), anyString(), any(CardCacheDto.class));
+            verify(mapper).toDto(any(CardInfo.class));
         }
 
         @Test
         void getByIdPositiveReadFromCache() {
 
-            long userId = testUser.getId();
+            long authId = testUser.getAuthId();
             UUID cardId = testCard.getId();
 
             CardCacheDto cachedDto = TestUtil.mapToCardRedisDto(testCard);
@@ -250,27 +248,27 @@ class CardServiceImplTest {
             CardInfoResponseDto expectedResult = TestUtil.mapToCardInfoResponseDtoFromRedisDto(cachedDto);
             when(mapper.toDto(cachedDto)).thenReturn(expectedResult);
 
-            CardInfoResponseDto actualResult = cardService.getById(cardId, userId);
+            CardInfoResponseDto actualResult = cardService.getById(cardId, authId);
 
             assertEquals(expectedResult, actualResult);
-            verify(cacheUtil, times(1)).composeKey(anyString(), any(UUID.class));
-            verify(cardInfoCacheService, times(1)).readFromCache(any(CacheType.class), anyString());
-            verify(mapper, times(1)).toDto(any(CardCacheDto.class));
+            verify(cacheUtil).composeKey(anyString(), any(UUID.class));
+            verify(cardInfoCacheService).readFromCache(any(CacheType.class), anyString());
+            verify(mapper).toDto(any(CardCacheDto.class));
         }
 
         @Test
         void getByIdShouldThrowExceptionWhenNotFound() {
 
-            long userId = testUser.getId();
+            long authId = testUser.getAuthId();
             UUID cardId = UUID.randomUUID();
 
             when(cardInfoCacheService.readFromCache(eq(CardCache.BY_ID), anyString())).thenReturn(Optional.empty());
-            when(cardRepository.findByIdAndUserId(cardId, userId)).thenReturn(Optional.empty());
+            when(cardRepository.findByIdAndAuthUserId(cardId, authId)).thenReturn(Optional.empty());
 
-            assertThrowsExactly(CardNotFoundException.class, () -> cardService.getById(cardId, userId));
-            verify(cacheUtil, times(1)).composeKey(anyString(), any(UUID.class));
-            verify(cardInfoCacheService, times(1)).readFromCache(any(CacheType.class), anyString());
-            verify(cardRepository, times(1)).findByIdAndUserId(any(UUID.class), anyLong());
+            assertThrowsExactly(CardNotFoundException.class, () -> cardService.getById(cardId, authId));
+            verify(cacheUtil).composeKey(anyString(), any(UUID.class));
+            verify(cardInfoCacheService).readFromCache(any(CacheType.class), anyString());
+            verify(cardRepository).findByIdAndAuthUserId(any(UUID.class), anyLong());
         }
 
     }
@@ -282,33 +280,33 @@ class CardServiceImplTest {
         @Test
         void deleteHappyPass() {
 
-            long userId = testUser.getId();
+            long authId = testUser.getAuthId();
             UUID cardId = testCard.getId();
 
-            when(cardRepository.findByIdAndUserId(cardId, userId)).thenReturn(Optional.of(testCard));
+            when(cardRepository.findByIdAndAuthUserId(cardId, authId)).thenReturn(Optional.of(testCard));
             doNothing().when(cardRepository).delete(testCard);
             doNothing().when(cardInfoCacheService).removeFromCache(any(CacheType.class), anyString());
             doNothing().when(userCacheInvalidator).invalidate(anyLong());
 
-            cardService.delete(cardId, userId);
+            cardService.delete(cardId, authId);
 
             ArgumentCaptor<Long> userIdCaptor = ArgumentCaptor.forClass(Long.class);
             ArgumentCaptor<UUID> cardIdCaptor = ArgumentCaptor.forClass(UUID.class);
 
-            verify(cardRepository, times(1))
-                    .findByIdAndUserId(cardIdCaptor.capture(), userIdCaptor.capture());
-            verify(cardRepository, times(1))
+            verify(cardRepository)
+                    .findByIdAndAuthUserId(cardIdCaptor.capture(), userIdCaptor.capture());
+            verify(cardRepository)
                     .delete(any(CardInfo.class));
-            verify(cacheUtil, times(1))
+            verify(cacheUtil)
                     .composeKey(anyString(), any(UUID.class));
-            verify(cardInfoCacheService, times(1))
+            verify(cardInfoCacheService)
                     .removeFromCache(any(CacheType.class), anyString());
-            verify(userCacheInvalidator, times(1))
+            verify(userCacheInvalidator)
                     .invalidate(userIdCaptor.capture());
 
             assertAll(
-                    () -> assertEquals(userId, userIdCaptor.getAllValues().getFirst()),
-                    () -> assertEquals(userId, userIdCaptor.getAllValues().get(1)),
+                    () -> assertEquals(authId, userIdCaptor.getAllValues().getFirst()),
+                    () -> assertEquals(authId, userIdCaptor.getAllValues().get(1)),
                     () -> assertEquals(cardId, cardIdCaptor.getValue())
             );
 
@@ -317,21 +315,21 @@ class CardServiceImplTest {
         @Test
         void deleteNotFoundCardByUserIdAndCardId() {
 
-            long userId = testUser.getId();
+            long authId = testUser.getAuthId();
             UUID cardId = testCard.getId();
 
-            when(cardRepository.findByIdAndUserId(cardId, userId)).thenReturn(Optional.empty());
+            when(cardRepository.findByIdAndAuthUserId(cardId, authId)).thenReturn(Optional.empty());
 
-            assertThrowsExactly(CardNotFoundException.class, () -> cardService.delete(cardId, userId));
+            assertThrowsExactly(CardNotFoundException.class, () -> cardService.delete(cardId, authId));
 
             ArgumentCaptor<Long> userIdCaptor = ArgumentCaptor.forClass(Long.class);
             ArgumentCaptor<UUID> cardIdCaptor = ArgumentCaptor.forClass(UUID.class);
 
-            verify(cardRepository, times(1))
-                    .findByIdAndUserId(cardIdCaptor.capture(), userIdCaptor.capture());
+            verify(cardRepository)
+                    .findByIdAndAuthUserId(cardIdCaptor.capture(), userIdCaptor.capture());
 
             assertAll(
-                    () -> assertEquals(userId, userIdCaptor.getValue()),
+                    () -> assertEquals(authId, userIdCaptor.getValue()),
                     () -> assertEquals(cardId, cardIdCaptor.getValue())
             );
 
@@ -345,28 +343,28 @@ class CardServiceImplTest {
         @Test
         void shouldReturnEmptyList() {
 
-            long usedId = testUser.getId();
+            long authId = testUser.getAuthId();
             testUser.getCards().clear();
 
             Pageable pageable = PageRequest.of(FIRST_PAGE, DEFAULT_PAGE_SIZE);
             doReturn(new PageImpl<>(Collections.emptyList(), pageable, testUser.getCards().size()))
-                    .when(cardRepository).findAllByUserId(usedId, pageable);
+                    .when(cardRepository).findAllByUserAuthId(authId, pageable);
 
-            List<CardInfoResponseDto> actualResult = cardService.getAll(usedId, pageable);
+            List<CardInfoResponseDto> actualResult = cardService.getAll(authId, pageable);
 
             assertThat(actualResult).isEmpty();
-            verify(cardRepository, times(1)).findAllByUserId(anyLong(), any(Pageable.class));
+            verify(cardRepository).findAllByUserAuthId(anyLong(), any(Pageable.class));
             verifyNoInteractions(mapper);
         }
 
         @Test
         void shouldReturnListOfCards() {
 
-            long usedId = testUser.getId();
+            long authId = testUser.getAuthId();
 
             Pageable pageable = PageRequest.of(FIRST_PAGE, DEFAULT_PAGE_SIZE);
             doReturn(new PageImpl<>(testUser.getCards(), pageable, testUser.getCards().size()))
-                    .when(cardRepository).findAllByUserId(usedId, pageable);
+                    .when(cardRepository).findAllByUserAuthId(authId, pageable);
 
             CardInfoResponseDto firstCardDto = TestUtil.mapToCardInfoResponseDto(testUser.getCards().getFirst());
             doReturn(firstCardDto).when(mapper).toDto(testUser.getCards().getFirst());
@@ -375,7 +373,7 @@ class CardServiceImplTest {
 
             List<CardInfoResponseDto> expectedResult = List.of(firstCardDto, secondCardDto);
 
-            List<CardInfoResponseDto> actualResult = cardService.getAll(usedId, pageable);
+            List<CardInfoResponseDto> actualResult = cardService.getAll(authId, pageable);
 
             assertAll(
                     () -> assertThat(actualResult).containsExactlyInAnyOrderElementsOf(expectedResult),
@@ -384,7 +382,7 @@ class CardServiceImplTest {
                     () -> assertThat(actualResult).hasSizeLessThanOrEqualTo(MAX_PAGE_SIZE)
             );
 
-            verify(cardRepository, times(1)).findAllByUserId(anyLong(), any(Pageable.class));
+            verify(cardRepository).findAllByUserAuthId(anyLong(), any(Pageable.class));
             verify(mapper, times(expectedResult.size())).toDto(any(CardInfo.class));
         }
 
@@ -444,7 +442,7 @@ class CardServiceImplTest {
         @Test
         void updateHappyPass() {
 
-            long userId = testUser.getId();
+            long authId = testUser.getAuthId();
             String updatedNumber = "000011122223333";
             CardInfoUpdateDto updateDto = new CardInfoUpdateDto(testCard.getId(),
                                                                 updatedNumber,
@@ -453,7 +451,7 @@ class CardServiceImplTest {
                                                                 testCard.getVersion());
 
             doReturn(Optional.of(testCard))
-                    .when(cardRepository).findByIdAndUserId(updateDto.id(), userId);
+                    .when(cardRepository).findByIdAndAuthUserId(updateDto.id(), authId);
             doReturn(Optional.empty())
                     .when(cardRepository).findByNumber(updateDto.number());
 
@@ -474,16 +472,16 @@ class CardServiceImplTest {
             doNothing()
                     .when(cardInfoCacheService).updateCache(any(CacheType.class), anyString(), any(CardCacheDto.class));
             doNothing()
-                    .when(userCacheInvalidator).invalidate(userId);
+                    .when(userCacheInvalidator).invalidate(authId);
             CardInfoResponseDto expectedResult = TestUtil.mapToCardInfoResponseDto(updatedEntity);
             doReturn(expectedResult)
                     .when(mapper).toDto(updatedEntity);
 
-            CardInfoResponseDto actualResult = cardService.update(updateDto, userId);
+            CardInfoResponseDto actualResult = cardService.update(updateDto, authId);
 
             assertThat(actualResult).isEqualTo(expectedResult);
 
-            verify(cardRepository).findByIdAndUserId(any(UUID.class), anyLong());
+            verify(cardRepository).findByIdAndAuthUserId(any(UUID.class), anyLong());
             verify(cardRepository).findByNumber(anyString());
             verify(mapper).updateEntity(any(CardInfoUpdateDto.class), any(CardInfo.class));
             verify(cardRepository).saveAndFlush(any(CardInfo.class));
@@ -497,7 +495,7 @@ class CardServiceImplTest {
         @Test
         void updatePositiveNoAnyChanges() {
 
-            long userId = testUser.getId();
+            long userId = testUser.getAuthId();
             CardInfoUpdateDto updateDto = new CardInfoUpdateDto(testCard.getId(),
                                                                 testCard.getNumber(),
                                                                 testCard.getHolder(),
@@ -505,7 +503,7 @@ class CardServiceImplTest {
                                                                 testCard.getVersion());
 
             doReturn(Optional.of(testCard))
-                    .when(cardRepository).findByIdAndUserId(updateDto.id(), userId);
+                    .when(cardRepository).findByIdAndAuthUserId(updateDto.id(), userId);
             CardInfoResponseDto expectedResult = TestUtil.mapToCardInfoResponseDto(testCard);
             doReturn(expectedResult)
                     .when(mapper).toDto(testCard);
@@ -514,7 +512,7 @@ class CardServiceImplTest {
 
             assertThat(actualResult).isEqualTo(expectedResult);
 
-            verify(cardRepository).findByIdAndUserId(any(UUID.class), anyLong());
+            verify(cardRepository).findByIdAndAuthUserId(any(UUID.class), anyLong());
             verify(mapper).toDto(any(CardInfo.class));
             verify(cardRepository, never()).findByNumber(anyString());
             verify(mapper, never()).updateEntity(any(CardInfoUpdateDto.class), any(CardInfo.class));
@@ -525,7 +523,7 @@ class CardServiceImplTest {
         @Test
         void updateShouldThrowExceptionWhenUpdatedCardNumberExistsAndAssignedToOtherCardId() {
 
-            long userId = testUser.getId();
+            long authId = testUser.getAuthId();
             CardInfo firstCard = testUser.getCards().getFirst();
             CardInfo secondCard = testUser.getCards().getLast();
             String updatedNumber = secondCard.getNumber();
@@ -536,12 +534,12 @@ class CardServiceImplTest {
                                                                 firstCard.getVersion());
 
             doReturn(Optional.of(firstCard))
-                    .when(cardRepository).findByIdAndUserId(updateDto.id(), userId);
+                    .when(cardRepository).findByIdAndAuthUserId(updateDto.id(), authId);
             doReturn(Optional.of(secondCard))
                     .when(cardRepository).findByNumber(updateDto.number());
 
-            assertThrowsExactly(IllegalCardUpdateRequestException.class, () -> cardService.update(updateDto, userId));
-            verify(cardRepository).findByIdAndUserId(any(UUID.class), anyLong());
+            assertThrowsExactly(IllegalCardUpdateRequestException.class, () -> cardService.update(updateDto, authId));
+            verify(cardRepository).findByIdAndAuthUserId(any(UUID.class), anyLong());
             verify(cardRepository).findByNumber(anyString());
             verify(cardRepository, never()).saveAndFlush(any(CardInfo.class));
             verifyNoInteractions(mapper, cacheUtil, cardInfoCacheService, userCacheInvalidator);
@@ -550,7 +548,7 @@ class CardServiceImplTest {
         @Test
         void updateShouldThrowExceptionWhenDbVersionHasChanged() {
 
-            long userId = testUser.getId();
+            long userId = testUser.getAuthId();
             String updatedNumber = "000011122223333";
             CardInfoUpdateDto updateDto = new CardInfoUpdateDto(testCard.getId(),
                                                                 updatedNumber,
@@ -561,10 +559,10 @@ class CardServiceImplTest {
             long currentVersion = testCard.getVersion();
             testCard.setVersion(++currentVersion);
             doReturn(Optional.of(testCard))
-                    .when(cardRepository).findByIdAndUserId(updateDto.id(), userId);
+                    .when(cardRepository).findByIdAndAuthUserId(updateDto.id(), userId);
 
             assertThrowsExactly(UpdateDtoVersionOutdatedException.class, () -> cardService.update(updateDto, userId));
-            verify(cardRepository).findByIdAndUserId(any(UUID.class), anyLong());
+            verify(cardRepository).findByIdAndAuthUserId(any(UUID.class), anyLong());
             verifyNoInteractions(mapper, cacheUtil, cardInfoCacheService, userCacheInvalidator);
             verify(cardRepository, never()).findByNumber(anyString());
             verify(cardRepository, never()).saveAndFlush(any(CardInfo.class));
@@ -573,7 +571,7 @@ class CardServiceImplTest {
         @Test
         void updateShouldThrowExceptionWhenCardNotFound() {
 
-            long userId = testUser.getId();
+            long userId = testUser.getAuthId();
             String updatedNumber = "000011122223333";
             CardInfoUpdateDto updateDto = new CardInfoUpdateDto(generateMissingCardIds(1).getFirst(),
                                                                 updatedNumber,
@@ -582,10 +580,10 @@ class CardServiceImplTest {
                                                                 testCard.getVersion());
 
             doReturn(Optional.empty())
-                    .when(cardRepository).findByIdAndUserId(updateDto.id(), userId);
+                    .when(cardRepository).findByIdAndAuthUserId(updateDto.id(), userId);
 
             assertThrowsExactly(CardNotFoundException.class, () -> cardService.update(updateDto, userId));
-            verify(cardRepository).findByIdAndUserId(any(UUID.class), anyLong());
+            verify(cardRepository).findByIdAndAuthUserId(any(UUID.class), anyLong());
             verify(cardRepository, never()).findByNumber(anyString());
             verify(cardRepository, never()).saveAndFlush(any(CardInfo.class));
         }

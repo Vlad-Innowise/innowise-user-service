@@ -44,9 +44,9 @@ public class UserServiceDbOnlyIT extends IntegrationTestBaseDbOnly {
     }
 
     private void validateTestData(Set<User> initialTestUsers) {
-        Optional<User> chechFrodo = userRepository.findByIdWithAllCards(TestData.FRODO_BAGGINS.getId());
-        Optional<User> chechSam = userRepository.findByIdWithAllCards(TestData.SAMWISE_GAMPGIE.getId());
-        Optional<User> chechArya = userRepository.findByIdWithAllCards(TestData.ARYA_STARK.getId());
+        Optional<User> chechFrodo = userRepository.findByAuthIdWithAllCards(TestData.FRODO_BAGGINS.getAuthId());
+        Optional<User> chechSam = userRepository.findByAuthIdWithAllCards(TestData.SAMWISE_GAMPGIE.getAuthId());
+        Optional<User> chechArya = userRepository.findByAuthIdWithAllCards(TestData.ARYA_STARK.getAuthId());
 
         long validUsersCount = Stream.of(chechFrodo, chechSam, chechArya)
                                      .filter(Optional::isPresent)
@@ -66,7 +66,9 @@ public class UserServiceDbOnlyIT extends IntegrationTestBaseDbOnly {
         UserCreateDto userCreateDto = new UserCreateDto("Taiwen", "Lanister", LocalDate.of(1970, 10, 18),
                                                         "taiwen_lanister@email.com");
 
-        UserResponseDto actualResult = userService.create(userCreateDto);
+        Long authId = 999L;
+
+        UserResponseDto actualResult = userService.create(userCreateDto, authId);
 
         assertAll(
                 () -> assertThat(actualResult.id()).isNotNull(),
@@ -107,11 +109,11 @@ public class UserServiceDbOnlyIT extends IntegrationTestBaseDbOnly {
     @Test
     void getByIdPositiveReadFromDb() {
 
-        long userId = TestData.FRODO_BAGGINS.getId();
+        long authId = TestData.FRODO_BAGGINS.getAuthId();
 
         UserResponseDto expectedResult = TestUtil.mapToUserResponseDto(TestData.FRODO_BAGGINS);
 
-        UserResponseDto actualResult = userService.getById(userId);
+        UserResponseDto actualResult = userService.getById(authId);
 
         assertAll(
                 () -> assertEquals(expectedResult, actualResult),
@@ -123,20 +125,20 @@ public class UserServiceDbOnlyIT extends IntegrationTestBaseDbOnly {
     @Test
     void getByIdShouldThrowExceptionWhenNotFound() {
 
-        long userId = 999L;
+        long authId = 999L;
 
-        assertThrowsExactly(UserNotFoundException.class, () -> userService.getById(userId));
+        assertThrowsExactly(UserNotFoundException.class, () -> userService.getById(authId));
     }
 
 
     @Test
     void deletePositive() {
 
-        long userId = TestData.FRODO_BAGGINS.getId();
+        long authId = TestData.FRODO_BAGGINS.getAuthId();
 
-        Optional<User> optionalUserBeforeDeletion = userRepository.findById(userId);
-        userService.delete(userId);
-        Optional<User> optionalUserAfterDeletion = userRepository.findById(userId);
+        Optional<User> optionalUserBeforeDeletion = userRepository.findByAuthIdWithAllCards(authId);
+        userService.delete(authId);
+        Optional<User> optionalUserAfterDeletion = userRepository.findByAuthIdWithAllCards(authId);
 
         assertAll(
                 () -> assertThat(optionalUserBeforeDeletion.isPresent()).isEqualTo(true),
@@ -147,12 +149,12 @@ public class UserServiceDbOnlyIT extends IntegrationTestBaseDbOnly {
     @Test
     void deleteShouldThrowExceptionWhenNotFound() {
 
-        long userId = 999L;
-        Optional<User> optionalUserBeforeDeletion = userRepository.findById(userId);
+        long authId = 999L;
+        Optional<User> optionalUserBeforeDeletion = userRepository.findById(authId);
 
         assertAll(
                 () -> assertThat(optionalUserBeforeDeletion.isPresent()).isEqualTo(false),
-                () -> assertThrowsExactly(UserNotFoundException.class, () -> userService.delete(userId))
+                () -> assertThrowsExactly(UserNotFoundException.class, () -> userService.delete(authId))
         );
     }
 
@@ -164,7 +166,7 @@ public class UserServiceDbOnlyIT extends IntegrationTestBaseDbOnly {
         List<Long> existingIds = Stream.of(TestData.FRODO_BAGGINS,
                                            TestData.SAMWISE_GAMPGIE,
                                            TestData.ARYA_STARK)
-                                       .map(User::getId)
+                                       .map(User::getAuthId)
                                        .toList();
 
         List<Long> missingIds = List.of(997L, 998L, 999L);
@@ -200,7 +202,7 @@ public class UserServiceDbOnlyIT extends IntegrationTestBaseDbOnly {
     @Test
     void updateHappyPass() {
 
-        long userId = TestData.FRODO_BAGGINS.getId();
+        long authId = TestData.FRODO_BAGGINS.getAuthId();
         User initialUser = TestUtil.deepCopyUser(TestData.FRODO_BAGGINS);
 
         UserUpdateDto updateDto = new UserUpdateDto("Updated Frodo",
@@ -209,7 +211,7 @@ public class UserServiceDbOnlyIT extends IntegrationTestBaseDbOnly {
                                                     "upd_frodo_baggins@email.com",
                                                     initialUser.getVersion());
 
-        UserResponseDto actualResult = userService.update(updateDto, userId);
+        UserResponseDto actualResult = userService.update(updateDto, authId);
 
         assertAll(
                 () -> assertThat(actualResult.name()).isEqualTo(updateDto.name()),
@@ -223,7 +225,7 @@ public class UserServiceDbOnlyIT extends IntegrationTestBaseDbOnly {
     @Test
     void updatePositiveNoAnyChanges() {
 
-        long userId = TestData.FRODO_BAGGINS.getId();
+        long authId = TestData.FRODO_BAGGINS.getAuthId();
         User initialUser = TestUtil.deepCopyUser(TestData.FRODO_BAGGINS);
 
         UserUpdateDto updateDto = new UserUpdateDto(initialUser.getName(),
@@ -234,7 +236,7 @@ public class UserServiceDbOnlyIT extends IntegrationTestBaseDbOnly {
 
         UserResponseDto expectedResult = TestUtil.mapToUserResponseDto(initialUser);
 
-        UserResponseDto actualResult = userService.update(updateDto, userId);
+        UserResponseDto actualResult = userService.update(updateDto, authId);
 
         assertThat(actualResult).isEqualTo(expectedResult);
     }
@@ -242,7 +244,7 @@ public class UserServiceDbOnlyIT extends IntegrationTestBaseDbOnly {
     @Test
     void updateShouldThrowExceptionWhenUpdatedEmailAlreadyExists() {
 
-        long userId = TestData.FRODO_BAGGINS.getId();
+        long authId = TestData.FRODO_BAGGINS.getAuthId();
         User initialUser = TestUtil.deepCopyUser(TestData.FRODO_BAGGINS);
 
         UserUpdateDto updateDto = new UserUpdateDto("Updated Frodo",
@@ -257,7 +259,7 @@ public class UserServiceDbOnlyIT extends IntegrationTestBaseDbOnly {
                 () -> assertThat(foundByEmail.isPresent()).isEqualTo(true),
                 () -> assertThat(foundByEmail.orElseThrow()).isNotEqualTo(initialUser),
                 () -> assertThrowsExactly(UniqueConstraintViolationException.class,
-                                          () -> userService.update(updateDto, userId))
+                                          () -> userService.update(updateDto, authId))
         );
 
     }
@@ -265,7 +267,7 @@ public class UserServiceDbOnlyIT extends IntegrationTestBaseDbOnly {
     @Test
     void updateShouldThrowExceptionWhenDbVersionHasChanged() {
 
-        long userId = TestData.FRODO_BAGGINS.getId();
+        long authId = TestData.FRODO_BAGGINS.getAuthId();
         User initialUser = TestUtil.deepCopyUser(TestData.FRODO_BAGGINS);
 
         UserUpdateDto updateDto = new UserUpdateDto("Updated Frodo",
@@ -275,20 +277,20 @@ public class UserServiceDbOnlyIT extends IntegrationTestBaseDbOnly {
                                                     initialUser.getVersion());
 
         String anotherUpdatedSurname = "upd_Baggins";
-        userRepository.findByIdWithAllCards(initialUser.getId())
+        userRepository.findByAuthIdWithAllCards(initialUser.getAuthId())
                       .ifPresent(u -> {
                                      u.setSurname(anotherUpdatedSurname);
                                      userRepository.saveAndFlush(u);
                                  }
                       );
 
-        assertThrowsExactly(UpdateDtoVersionOutdatedException.class, () -> userService.update(updateDto, userId));
+        assertThrowsExactly(UpdateDtoVersionOutdatedException.class, () -> userService.update(updateDto, authId));
     }
 
     @Test
     void updateShouldThrowExceptionWhenUserNotFound() {
 
-        long userId = 999L;
+        long authId = 999L;
         User initialUser = TestUtil.deepCopyUser(TestData.FRODO_BAGGINS);
         UserUpdateDto updateDto = new UserUpdateDto("Updated Frodo",
                                                     initialUser.getSurname(),
@@ -296,11 +298,11 @@ public class UserServiceDbOnlyIT extends IntegrationTestBaseDbOnly {
                                                     "upd_frodo_baggins@email.com",
                                                     initialUser.getVersion());
 
-        Optional<User> optionalUser = userRepository.findById(userId);
+        Optional<User> optionalUser = userRepository.findByAuthIdWithAllCards(authId);
 
         assertAll(
                 () -> assertThat(optionalUser.isPresent()).isEqualTo(false),
-                () -> assertThrowsExactly(UserNotFoundException.class, () -> userService.update(updateDto, userId))
+                () -> assertThrowsExactly(UserNotFoundException.class, () -> userService.update(updateDto, authId))
         );
 
     }

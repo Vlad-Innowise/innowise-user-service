@@ -18,10 +18,10 @@ public interface CardInfoRepository extends JpaRepository<CardInfo, UUID> {
 
     Optional<CardInfo> findByNumber(String number);
 
-    @Query("SELECT ci FROM CardInfo ci JOIN FETCH ci.user WHERE ci.id =:id AND ci.user.id =:userId")
-    Optional<CardInfo> findByIdAndUserId(@Param("id") UUID id, @Param("userId") Long userId);
+    @Query("SELECT ci FROM CardInfo ci JOIN FETCH ci.user WHERE ci.id =:id AND ci.user.authId =:authId")
+    Optional<CardInfo> findByIdAndAuthUserId(@Param("id") UUID id, @Param("authId") Long authId);
 
-    Page<CardInfo> findAllByUserId(Long userId, Pageable pageable);
+    Page<CardInfo> findAllByUserAuthId(Long authId, Pageable pageable);
 
     List<CardInfo> findAllByIdIn(Collection<UUID> ids);
 }

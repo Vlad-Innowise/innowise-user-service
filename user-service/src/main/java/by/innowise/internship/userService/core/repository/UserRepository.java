@@ -11,12 +11,12 @@ import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    @Query("SELECT u FROM User u LEFT JOIN FETCH u.cards WHERE u.id IN(:ids)")
-    List<User> findByIdIn(@Param("ids") Collection<Long> ids);
+    @Query("SELECT u FROM User u LEFT JOIN FETCH u.cards WHERE u.authId IN(:authIds)")
+    List<User> findByIdIn(@Param("authIds") Collection<Long> authIds);
 
     @Query("SELECT u FROM User u WHERE u.email = :email")
     Optional<User> findByEmail(@Param("email") String email);
 
-    @Query("SELECT u FROM User u LEFT JOIN FETCH u.cards WHERE u.id =:id")
-    Optional<User> findByIdWithAllCards(@Param("id") Long id);
+    @Query("SELECT u FROM User u LEFT JOIN FETCH u.cards WHERE u.authId =:authId")
+    Optional<User> findByAuthIdWithAllCards(@Param("authId") Long id);
 }

@@ -68,7 +68,7 @@ public class CardServiceDbOnlyIT extends IntegrationTestBaseDbOnly {
         @Test
         void createHappyPass() {
 
-            long userId = TestData.ARYA_STARK.getId();
+            long authId = TestData.ARYA_STARK.getAuthId();
             String newCardNumber = "8888555544443333";
             CardInfoCreateDto createDto = new CardInfoCreateDto(newCardNumber, "ARYA STARK",
                                                                 LocalDate.of(2027, 11, 30));
@@ -77,7 +77,7 @@ public class CardServiceDbOnlyIT extends IntegrationTestBaseDbOnly {
             Pageable pageable = PageRequest.of(FIRST_PAGE, DEFAULT_PAGE_SIZE);
             List<CardInfoResponseDto> initialCardList = cardService.getAll(TestData.ARYA_STARK.getId(), pageable);
 
-            CardInfoResponseDto createdCard = cardService.create(createDto, userId);
+            CardInfoResponseDto createdCard = cardService.create(createDto, authId);
 
             assertAll(
                     () -> assertThat(isNewCardNumberExist).isEqualTo(false),
@@ -92,7 +92,7 @@ public class CardServiceDbOnlyIT extends IntegrationTestBaseDbOnly {
         @Test
         void createShouldThrowExceptionUserNotFound() {
 
-            long userId = 999L;
+            long authId = 999L;
             String newCardNumber = "8888555544443333";
             CardInfoCreateDto createDto = new CardInfoCreateDto(newCardNumber, "ARYA STARK",
                                                                 LocalDate.of(2027, 11, 30));
@@ -104,7 +104,7 @@ public class CardServiceDbOnlyIT extends IntegrationTestBaseDbOnly {
             assertAll(
                     () -> assertThat(isNewCardNumberExist).isEqualTo(false),
                     () -> assertThat(initialCardList).isEmpty(),
-                    () -> assertThrowsExactly(UserNotFoundException.class, () -> cardService.create(createDto, userId))
+                    () -> assertThrowsExactly(UserNotFoundException.class, () -> cardService.create(createDto, authId))
             );
         }
     }
@@ -117,15 +117,15 @@ public class CardServiceDbOnlyIT extends IntegrationTestBaseDbOnly {
         @Test
         void deleteHappyPass() {
 
-            long userId = TestData.SAMWISE_GAMPGIE.getId();
+            long authId = TestData.SAMWISE_GAMPGIE.getAuthId();
             UUID cardId = TestData.SAMWISE_GAMPGIE.getCards().getFirst().getId();
 
             Pageable pageable = PageRequest.of(FIRST_PAGE, DEFAULT_PAGE_SIZE);
-            List<CardInfoResponseDto> foundCards = cardService.getAll(userId, pageable);
+            List<CardInfoResponseDto> foundCards = cardService.getAll(authId, pageable);
 
-            cardService.delete(cardId, userId);
+            cardService.delete(cardId, authId);
 
-            List<CardInfoResponseDto> foundCardsAfterDeletion = cardService.getAll(userId, pageable);
+            List<CardInfoResponseDto> foundCardsAfterDeletion = cardService.getAll(authId, pageable);
 
             assertAll(
                     () -> assertThat(foundCards.size()).isEqualTo(1),
@@ -138,16 +138,16 @@ public class CardServiceDbOnlyIT extends IntegrationTestBaseDbOnly {
         @Test
         void deleteNotFoundCardByUserIdAndCardId() {
 
-            long userId = TestData.SAMWISE_GAMPGIE.getId();
+            long authId = TestData.SAMWISE_GAMPGIE.getAuthId();
             UUID cardId = UUID.randomUUID();
 
             Pageable pageable = PageRequest.of(FIRST_PAGE, DEFAULT_PAGE_SIZE);
-            List<CardInfoResponseDto> foundCards = cardService.getAll(userId, pageable);
+            List<CardInfoResponseDto> foundCards = cardService.getAll(authId, pageable);
 
             assertAll(
                     () -> assertThat(foundCards.size()).isEqualTo(1),
                     () -> assertThat(foundCards.getFirst().id()).isNotEqualTo(cardId),
-                    () -> assertThrowsExactly(CardNotFoundException.class, () -> cardService.delete(cardId, userId))
+                    () -> assertThrowsExactly(CardNotFoundException.class, () -> cardService.delete(cardId, authId))
             );
         }
     }
@@ -159,13 +159,13 @@ public class CardServiceDbOnlyIT extends IntegrationTestBaseDbOnly {
         @Test
         void getByIdPositiveReadFromDb() {
 
-            long userId = TestData.SAMWISE_GAMPGIE.getId();
+            long authId = TestData.SAMWISE_GAMPGIE.getAuthId();
             UUID cardId = TestData.SAMWISE_GAMPGIE.getCards().getFirst().getId();
 
             CardInfoResponseDto expectedResult = TestUtil.mapToCardInfoResponseDto(
                     TestData.SAMWISE_GAMPGIE.getCards().getFirst());
 
-            CardInfoResponseDto actualResult = cardService.getById(cardId, userId);
+            CardInfoResponseDto actualResult = cardService.getById(cardId, authId);
 
             assertThat(actualResult).isEqualTo(expectedResult);
         }
@@ -173,10 +173,10 @@ public class CardServiceDbOnlyIT extends IntegrationTestBaseDbOnly {
         @Test
         void getByIdShouldThrowExceptionWhenNotFound() {
 
-            long userId = TestData.SAMWISE_GAMPGIE.getId();
+            long authId = TestData.SAMWISE_GAMPGIE.getAuthId();
             UUID cardId = UUID.randomUUID();
 
-            assertThrowsExactly(CardNotFoundException.class, () -> cardService.getById(cardId, userId));
+            assertThrowsExactly(CardNotFoundException.class, () -> cardService.getById(cardId, authId));
         }
 
     }
@@ -190,7 +190,7 @@ public class CardServiceDbOnlyIT extends IntegrationTestBaseDbOnly {
 
             Pageable pageable = PageRequest.of(FIRST_PAGE, DEFAULT_PAGE_SIZE);
 
-            List<CardInfoResponseDto> actualResult = cardService.getAll(TestData.ARYA_STARK.getId(), pageable);
+            List<CardInfoResponseDto> actualResult = cardService.getAll(TestData.ARYA_STARK.getAuthId(), pageable);
 
             assertThat(actualResult).isEmpty();
         }
@@ -200,7 +200,7 @@ public class CardServiceDbOnlyIT extends IntegrationTestBaseDbOnly {
 
             Pageable pageable = PageRequest.of(FIRST_PAGE, DEFAULT_PAGE_SIZE);
 
-            List<CardInfoResponseDto> actualResult = cardService.getAll(TestData.FRODO_BAGGINS.getId(), pageable);
+            List<CardInfoResponseDto> actualResult = cardService.getAll(TestData.FRODO_BAGGINS.getAuthId(), pageable);
 
             List<CardInfoResponseDto> expectedResult =
                     TestData.FRODO_BAGGINS.getCards().stream()
@@ -282,7 +282,7 @@ public class CardServiceDbOnlyIT extends IntegrationTestBaseDbOnly {
         @Test
         void updateHappyPass() {
 
-            long userId = TestData.SAMWISE_GAMPGIE.getId();
+            long authId = TestData.SAMWISE_GAMPGIE.getAuthId();
             CardInfo initialCard = TestUtil.copyCard(TestData.SAMWISE_GAMPGIE.getCards().getFirst());
 
             String updatedNumber = "000011122223333";
@@ -292,7 +292,7 @@ public class CardServiceDbOnlyIT extends IntegrationTestBaseDbOnly {
                                                                 initialCard.getExpirationDate(),
                                                                 initialCard.getVersion());
 
-            CardInfoResponseDto actualResult = cardService.update(updateDto, userId);
+            CardInfoResponseDto actualResult = cardService.update(updateDto, authId);
 
             assertAll(
                     () -> assertThat(actualResult.number()).isEqualTo(updatedNumber),
@@ -305,7 +305,7 @@ public class CardServiceDbOnlyIT extends IntegrationTestBaseDbOnly {
         @Test
         void updatePositiveNoAnyChanges() {
 
-            long userId = TestData.SAMWISE_GAMPGIE.getId();
+            long authId = TestData.SAMWISE_GAMPGIE.getAuthId();
             CardInfo initialCard = TestUtil.copyCard(TestData.SAMWISE_GAMPGIE.getCards().getFirst());
 
             CardInfoUpdateDto updateDto = new CardInfoUpdateDto(initialCard.getId(),
@@ -316,7 +316,7 @@ public class CardServiceDbOnlyIT extends IntegrationTestBaseDbOnly {
 
             CardInfoResponseDto expectedResult = TestUtil.mapToCardInfoResponseDto(initialCard);
 
-            CardInfoResponseDto actualResult = cardService.update(updateDto, userId);
+            CardInfoResponseDto actualResult = cardService.update(updateDto, authId);
 
             assertThat(actualResult).isEqualTo(expectedResult);
         }
@@ -324,7 +324,7 @@ public class CardServiceDbOnlyIT extends IntegrationTestBaseDbOnly {
         @Test
         void updateShouldThrowExceptionWhenUpdatedCardNumberExistsAndAssignedToOtherCardId() {
 
-            long userId = TestData.FRODO_BAGGINS.getId();
+            long authId = TestData.FRODO_BAGGINS.getAuthId();
             CardInfo firstCard = TestUtil.copyCard(TestData.FRODO_BAGGINS.getCards().getFirst());
             CardInfo secondCard = TestUtil.copyCard(TestData.SAMWISE_GAMPGIE.getCards().getFirst());
 
@@ -335,13 +335,13 @@ public class CardServiceDbOnlyIT extends IntegrationTestBaseDbOnly {
                                                                 firstCard.getExpirationDate(),
                                                                 firstCard.getVersion());
 
-            assertThrowsExactly(IllegalCardUpdateRequestException.class, () -> cardService.update(updateDto, userId));
+            assertThrowsExactly(IllegalCardUpdateRequestException.class, () -> cardService.update(updateDto, authId));
         }
 
         @Test
         void updateShouldThrowExceptionWhenDbVersionHasChanged() {
 
-            long userId = TestData.SAMWISE_GAMPGIE.getId();
+            long authId = TestData.SAMWISE_GAMPGIE.getAuthId();
             CardInfo initialCard = TestUtil.copyCard(TestData.SAMWISE_GAMPGIE.getCards().getFirst());
 
             String updatedNumber = "000011122223333";
@@ -359,13 +359,13 @@ public class CardServiceDbOnlyIT extends IntegrationTestBaseDbOnly {
                                      }
                           );
 
-            assertThrowsExactly(UpdateDtoVersionOutdatedException.class, () -> cardService.update(updateDto, userId));
+            assertThrowsExactly(UpdateDtoVersionOutdatedException.class, () -> cardService.update(updateDto, authId));
         }
 
         @Test
         void updateShouldThrowExceptionWhenCardNotFound() {
 
-            long userId = TestData.SAMWISE_GAMPGIE.getId();
+            long authId = TestData.SAMWISE_GAMPGIE.getAuthId();
             CardInfo initialCard = TestUtil.copyCard(TestData.SAMWISE_GAMPGIE.getCards().getFirst());
             String updatedNumber = "000011122223333";
             CardInfoUpdateDto updateDto = new CardInfoUpdateDto(UUID.randomUUID(),
@@ -374,7 +374,7 @@ public class CardServiceDbOnlyIT extends IntegrationTestBaseDbOnly {
                                                                 initialCard.getExpirationDate(),
                                                                 initialCard.getVersion());
 
-            assertThrowsExactly(CardNotFoundException.class, () -> cardService.update(updateDto, userId));
+            assertThrowsExactly(CardNotFoundException.class, () -> cardService.update(updateDto, authId));
         }
 
     }

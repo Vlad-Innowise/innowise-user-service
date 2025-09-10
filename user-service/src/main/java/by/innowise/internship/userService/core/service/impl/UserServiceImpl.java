@@ -38,8 +38,8 @@ public class UserServiceImpl implements UserService, InternalUserService {
 
     @Transactional
     @Override
-    public UserResponseDto create(UserCreateDto dto) {
-        User toSave = mapper.toEntity(dto);
+    public UserResponseDto create(UserCreateDto dto, Long authUserId) {
+        User toSave = mapper.toEntity(dto, authUserId);
         log.info("Invoking user repository to save user: {}", toSave);
         User saved = userRepository.saveAndFlush(toSave);
         log.info("Map a created user entity {} to dto", saved);
@@ -57,9 +57,9 @@ public class UserServiceImpl implements UserService, InternalUserService {
 
     @Transactional
     @Override
-    public UserResponseDto getById(Long userId) {
-        String cacheKey = cacheUtil.composeKey("id", userId);
-        log.info("Trying to retrieve the user: [{}] from cache by key: {}", userId, cacheKey);
+    public UserResponseDto getById(Long authUserId) {
+        String cacheKey = cacheUtil.composeKey("id", authUserId);
+        log.info("Trying to retrieve the user: [{}] from cache by key: {}", authUserId, cacheKey);
         return userCacheService
                 .readFromCache(UserCache.BY_ID, cacheKey)
                 .map(cached -> {
@@ -68,7 +68,7 @@ public class UserServiceImpl implements UserService, InternalUserService {
                 })
                 .orElseGet(() -> {
                     log.info("Not found in cache by key: {}, go to DB", cacheKey);
-                    User found = getUserByIdFetchAllCards(userId);
+                    User found = getUserByAuthIdFetchAllCards(authUserId);
                     updateCache(found);
                     return mapper.toDto(found);
                 });
@@ -76,9 +76,9 @@ public class UserServiceImpl implements UserService, InternalUserService {
 
     @Transactional
     @Override
-    public UserResponseDto update(UserUpdateDto dto, Long userId) {
+    public UserResponseDto update(UserUpdateDto dto, Long authUserId) {
 
-        User foundById = getUserByIdFetchAllCards(userId);
+        User foundById = getUserByAuthIdFetchAllCards(authUserId);
 
         User updated;
         if (hasAnyFieldChanged(dto, foundById)) {
@@ -97,7 +97,7 @@ public class UserServiceImpl implements UserService, InternalUserService {
                               });
             }
 
-            updated = mapper.updateEntity(dto, foundById);
+            updated = mapper.updateEntity(dto, foundById, authUserId);
             log.info("Updated entity {} to save", updated);
             userRepository.saveAndFlush(updated);
             updateCache(updated);
@@ -114,19 +114,19 @@ public class UserServiceImpl implements UserService, InternalUserService {
 
     @Transactional
     @Override
-    public void delete(Long userId) {
-        User found = getUserByIdFetchAllCards(userId);
+    public void delete(Long authUserId) {
+        User found = getUserByAuthIdFetchAllCards(authUserId);
         log.info("Invoking user repository to delete a user: [{}]", found);
         userRepository.delete(found);
-        String cacheKey = cacheUtil.composeKey("id", userId);
+        String cacheKey = cacheUtil.composeKey("id", authUserId);
         log.info("Invoking cache service to remove a cache for a key: {}", cacheKey);
         userCacheService.removeFromCache(UserCache.BY_ID, cacheKey);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<UserResponseDto> getAllByIds(List<Long> ids) {
-        Set<Long> idsToFind = new HashSet<>(ids);
+    public List<UserResponseDto> getAllByIds(List<Long> authUserIds) {
+        Set<Long> idsToFind = new HashSet<>(authUserIds);
         log.info("Invoking user repository for ids: [{}]", idsToFind);
         List<User> foundUsers = userRepository.findByIdIn(idsToFind);
         log.info("Retrieved users list: {}", foundUsers);
@@ -142,23 +142,16 @@ public class UserServiceImpl implements UserService, InternalUserService {
 
     @Transactional
     @Override
-    public User getUserById(Long id) {
-        log.info("Trying to get a user by id: {}", id);
-        User found = userRepository.findById(id)
-                                   .orElseThrow(
-                                           () -> new UserNotFoundException(
-                                                   String.format("User with id [%s] doesn't exist", id),
-                                                   HttpStatus.NOT_FOUND));
-        log.info("Retrieved a user {}", found);
-        return found;
+    public User getUserByAuthId(Long authId) {
+        return getUserByAuthIdFetchAllCards(authId);
     }
 
-    private User getUserByIdFetchAllCards(Long id) {
-        log.info("Trying to get a user by id: {} with all cards", id);
-        User found = userRepository.findByIdWithAllCards(id)
+    private User getUserByAuthIdFetchAllCards(Long authId) {
+        log.info("Trying to get a user by authId: {} with all cards", authId);
+        User found = userRepository.findByAuthIdWithAllCards(authId)
                                    .orElseThrow(
                                            () -> new UserNotFoundException(
-                                                   String.format("User with id [%s] doesn't exist", id),
+                                                   String.format("User with authId [%s] doesn't exist", authId),
                                                    HttpStatus.NOT_FOUND));
         log.info("Retrieved a user: {} with all cards {}", found, found.getCards());
         return found;
@@ -174,7 +167,7 @@ public class UserServiceImpl implements UserService, InternalUserService {
 
     private void updateCache(User entity) {
         UserCacheDto cacheDto = mapper.toRedisDto(entity);
-        String cacheKey = cacheUtil.composeKey("id", cacheDto.getId());
+        String cacheKey = cacheUtil.composeKey("id", entity.getAuthId());
         log.info("Putting value: {} into cache: [{}]", cacheDto, UserCache.BY_ID.getCacheName());
         userCacheService.updateCache(UserCache.BY_ID, cacheKey, cacheDto);
     }

@@ -8,15 +8,15 @@ import java.util.List;
 
 public interface UserService {
 
-    UserResponseDto create(UserCreateDto dto);
+    UserResponseDto create(UserCreateDto dto, Long authUserId);
 
     boolean isEmailExists(String email);
 
-    UserResponseDto getById(Long userId);
+    UserResponseDto getById(Long authUserId);
 
-    UserResponseDto update(UserUpdateDto dto, Long userId);
+    UserResponseDto update(UserUpdateDto dto, Long authUserId);
 
-    void delete(Long userId);
+    void delete(Long authUserId);
 
-    List<UserResponseDto> getAllByIds(List<Long> ids);
+    List<UserResponseDto> getAllByIds(List<Long> authUserIds);
 }

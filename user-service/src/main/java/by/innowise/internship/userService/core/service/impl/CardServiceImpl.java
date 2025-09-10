@@ -45,9 +45,9 @@ public class CardServiceImpl implements CardService {
 
     @Transactional
     @Override
-    public CardInfoResponseDto create(CardInfoCreateDto dto, Long userId) {
-        log.info("Invoking internal user service to get a user by userId: [{}]", userId);
-        User user = internalUserService.getUserById(userId);
+    public CardInfoResponseDto create(CardInfoCreateDto dto, Long authUserId) {
+        log.info("Invoking internal user service to get a user by authUserId: [{}]", authUserId);
+        User user = internalUserService.getUserByAuthId(authUserId);
 
         log.info("Mapping cardInfoCreateDto:{} and user:{} to card entity", dto, user);
         CardInfo toSave = mapper.toEntity(dto, user);
@@ -58,7 +58,7 @@ public class CardServiceImpl implements CardService {
 
         updateCache(saved);
 
-        invalidatingUserCache(userId);
+        invalidatingUserCache(authUserId);
 
         log.info("Map user entity: {} to dto", saved);
         return mapper.toDto(saved);
@@ -73,7 +73,7 @@ public class CardServiceImpl implements CardService {
 
     @Transactional
     @Override
-    public CardInfoResponseDto getById(UUID cardId, Long userId) {
+    public CardInfoResponseDto getById(UUID cardId, Long authUserId) {
         String cacheKey = cacheUtil.composeKey("id", cardId);
         log.info("Trying to retrieve a card from cache by key: {}", cacheKey);
         return cardInfoCacheService
@@ -84,7 +84,7 @@ public class CardServiceImpl implements CardService {
                 })
                 .orElseGet(() -> {
                     log.info("Not found in cache by key: {}, go to DB", cacheKey);
-                    CardInfo found = getCardByCardIdAndUserId(cardId, userId);
+                    CardInfo found = getCardByCardIdAndUserId(cardId, authUserId);
                     updateCache(found);
                     return mapper.toDto(found);
                 });
@@ -92,11 +92,11 @@ public class CardServiceImpl implements CardService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<CardInfoResponseDto> getAll(Long userId, Pageable pageable) {
-        log.info("Invoking card repository to retrieve all cards for user with id: [{}]", userId);
-        Page<CardInfo> cards = cardRepository.findAllByUserId(userId, pageable);
+    public List<CardInfoResponseDto> getAll(Long authUserId, Pageable pageable) {
+        log.info("Invoking card repository to retrieve all cards for user with id: [{}]", authUserId);
+        Page<CardInfo> cards = cardRepository.findAllByUserAuthId(authUserId, pageable);
         log.info("Retrieved cards page {} out of {} for the userId: [{}]: {}", cards.getNumber(), cards.getTotalPages(),
-                 userId, cards.getContent());
+                 authUserId, cards.getContent());
         return cards.stream()
                     .map(mapper::toDto)
                     .toList();
@@ -104,9 +104,9 @@ public class CardServiceImpl implements CardService {
 
     @Transactional
     @Override
-    public CardInfoResponseDto update(CardInfoUpdateDto dto, Long userId) {
+    public CardInfoResponseDto update(CardInfoUpdateDto dto, Long authUserId) {
 
-        CardInfo foundById = getCardByCardIdAndUserId(dto.id(), userId);
+        CardInfo foundById = getCardByCardIdAndUserId(dto.id(), authUserId);
 
         CardInfo updated;
 
@@ -125,7 +125,7 @@ public class CardServiceImpl implements CardService {
             cardRepository.saveAndFlush(updated);
 
             updateCache(updated);
-            invalidatingUserCache(userId);
+            invalidatingUserCache(authUserId);
         } else {
             log.info("Non of the fields in the dto {} have changed any of the fields in the entity {}", dto, foundById);
             updated = foundById;
@@ -135,14 +135,14 @@ public class CardServiceImpl implements CardService {
 
     @Transactional
     @Override
-    public void delete(UUID cardId, Long userId) {
-        CardInfo found = getCardByCardIdAndUserId(cardId, userId);
+    public void delete(UUID cardId, Long authUserId) {
+        CardInfo found = getCardByCardIdAndUserId(cardId, authUserId);
         log.info("Invoking card repository to delete a card: [{}]", found);
         cardRepository.delete(found);
         String cacheKey = cacheUtil.composeKey("id", cardId);
         log.info("Invoking cache service to remove a cache for a key: {}", cacheKey);
         cardInfoCacheService.removeFromCache(CardCache.BY_ID, cacheKey);
-        invalidatingUserCache(userId);
+        invalidatingUserCache(authUserId);
     }
 
     @Transactional(readOnly = true)
@@ -163,11 +163,11 @@ public class CardServiceImpl implements CardService {
                          .toList();
     }
 
-    private CardInfo getCardByCardIdAndUserId(UUID cardId, Long userId) {
-        log.info("Invoking card repository to find a card with id: [{}] for userId: [{}]", cardId, userId);
-        CardInfo found = cardRepository.findByIdAndUserId(cardId, userId).orElseThrow(
+    private CardInfo getCardByCardIdAndUserId(UUID cardId, Long authUserId) {
+        log.info("Invoking card repository to find a card with id: [{}] for authUserId: [{}]", cardId, authUserId);
+        CardInfo found = cardRepository.findByIdAndAuthUserId(cardId, authUserId).orElseThrow(
                 () -> new CardNotFoundException(
-                        String.format("Haven't found a card with id: [%s] for user: [%s]", cardId, userId),
+                        String.format("Haven't found a card with id: [%s] for user: [%s]", cardId, authUserId),
                         HttpStatus.NOT_FOUND));
         log.info("Retrieved a card from from DB: {}", found);
         return found;

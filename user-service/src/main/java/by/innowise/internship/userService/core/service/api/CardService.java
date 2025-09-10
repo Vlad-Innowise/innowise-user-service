@@ -11,17 +11,17 @@ import java.util.UUID;
 
 public interface CardService {
 
-    CardInfoResponseDto create(CardInfoCreateDto dto, Long userId);
+    CardInfoResponseDto create(CardInfoCreateDto dto, Long authUserId);
 
     boolean cardNumberExists(String number);
 
-    CardInfoResponseDto getById(UUID cardId, @Positive Long userId);
+    CardInfoResponseDto getById(UUID cardId, @Positive Long authUserId);
 
-    List<CardInfoResponseDto> getAll(Long userId, Pageable pageable);
+    List<CardInfoResponseDto> getAll(Long authUserId, Pageable pageable);
 
-    CardInfoResponseDto update(CardInfoUpdateDto dto, Long userId);
+    CardInfoResponseDto update(CardInfoUpdateDto dto, Long authUserId);
 
-    void delete(UUID cardId, Long userId);
+    void delete(UUID cardId, Long authUserId);
 
     List<CardInfoResponseDto> getAllByIds(List<UUID> ids);
 }

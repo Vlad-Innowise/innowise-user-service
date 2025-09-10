@@ -22,6 +22,7 @@ jobs:
         run: |
           mvn \
           -B \
+          -s .github/maven-settings.xml \
           -DskipTests=false \
           -Dtest='!*ApplicationTests' \
           verify

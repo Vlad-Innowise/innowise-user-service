@@ -3,6 +3,10 @@ on: [ push, pull_request, workflow_dispatch ]
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    env:
+      GITHUB_INNOWISE_USERNAME: Vlad-Innowise
+      GITHUB_INNOWISE_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+      TOKEN_SECRET: ${{ secrets.JWT_TOKEN }}
     steps:
       - name: Get source code
         uses: actions/checkout@v4
@@ -39,6 +43,9 @@ jobs:
   sonarqube:
     runs-on: ubuntu-latest
     needs: build-and-test
+    env:
+      GITHUB_INNOWISE_USERNAME: Vlad-Innowise
+      GITHUB_INNOWISE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Get source code
         uses: actions/checkout@v4

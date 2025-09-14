@@ -2,6 +2,7 @@ package by.innowise.internship.userService.core.config;
 
 import by.innowise.internship.security.dto.Role;
 import by.innowise.internship.security.filter.JwtFilter;
+import by.innowise.internship.security.filter.JwtFilterConfigurer;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,9 +14,19 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.util.List;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    private static final List<String> WHITELIST_PATHS = List.of(
+            "/api/v1/internal", "/api/v1/internal/**");
+
+    @Bean
+    public JwtFilterConfigurer whitelistConfigurer() {
+        return filter -> filter.setWhitelistPaths(WHITELIST_PATHS);
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtFilter filter) throws Exception {
@@ -26,6 +37,7 @@ public class SecurityConfig {
                                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(requests -> requests
                     .requestMatchers("/api/v1/admin", "/api/v1/admin/**").hasRole(Role.ADMIN.name())
+                    .requestMatchers(WHITELIST_PATHS.toArray(String[]::new)).permitAll()
                     .anyRequest().authenticated()
             )
 

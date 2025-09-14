@@ -1,5 +1,6 @@
 package by.innowise.internship.userService.core.mapper;
 
+import by.innowise.common.library.dto.UserProfileDto;
 import by.innowise.internship.userService.api.dto.user.UserCreateDto;
 import by.innowise.internship.userService.api.dto.user.UserResponseDto;
 import by.innowise.internship.userService.api.dto.user.UserUpdateDto;
@@ -20,6 +21,7 @@ public interface UserMapper {
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "version", ignore = true)
     @Mapping(target = "cards", ignore = true)
+    @Mapping(target = "authId", ignore = true)
     User toEntity(UserCreateDto dto, @Context Long authId);
 
     @Mapping(target = "id", ignore = true)
@@ -27,9 +29,12 @@ public interface UserMapper {
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "version", ignore = true)
     @Mapping(target = "cards", ignore = true)
+    @Mapping(target = "authId", ignore = true)
     User updateEntity(UserUpdateDto dto, @MappingTarget User entity, @Context Long authId);
 
     UserResponseDto toDto(User e);
+
+    UserProfileDto toProfileDto(User user);
 
     UserCacheDto toRedisDto(User e);
 

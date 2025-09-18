@@ -14,10 +14,10 @@ services:
       TOKEN_SECRET: "${TOKEN_SECRET}"
       JAVA_TOOL_OPTIONS: '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5000'
     ports:
-      - '8080:8080'
+      - '8090:8080'
       - '5000:5000'
     expose:
-      - '8080' # application api
+      - '8090' # application api
       - '5000' # debug
     restart: 'always'
     depends_on:
@@ -47,3 +47,8 @@ services:
 volumes:
   pg-user-service-vol:
   redis-user-service-vol:
+
+networks:
+  default:
+    external: true
+    name: 'innowise-net'

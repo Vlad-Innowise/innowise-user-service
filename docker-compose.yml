@@ -15,13 +15,13 @@ services:
       USER_SERVICE_GH_REPO_NAME: "${USER_SERVICE_GH_REPO_NAME}"
       USER_SERVICE_IMAGE_NAME: "${USER_SERVICE_IMAGE_NAME}"
       TOKEN_SECRET: "${TOKEN_SECRET}"
-      JAVA_TOOL_OPTIONS: '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5000'
+      JAVA_TOOL_OPTIONS: '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5006'
     ports:
       - '8090:8080'
-      - '5000:5000'
+      - '5006:5006'
     expose:
       - '8090' # application api
-      - '5000' # debug
+      - '5006' # debug
     restart: 'always'
     depends_on:
       - 'user-service-db'

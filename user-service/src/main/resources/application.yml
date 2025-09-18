@@ -3,7 +3,7 @@ spring:
     name: 'user-service'
 
   profiles:
-    active: 'local'
+    active: '${APPLICATION_PROFILE}'
 
   data:
     web:
@@ -13,6 +13,9 @@ spring:
         one-indexed-parameters: 'true'
 
   datasource:
+    url: "${DB_URL}"
+    username: "${DB_USER}"
+    password: "${DB_PASSWORD}"
     driverClassName: 'org.postgresql.Driver'
     hikari:
       maximum-pool-size: 20
@@ -30,6 +33,12 @@ spring:
     enabled: 'true'
     change-log: 'classpath:/db/changelog/db.changelog-master.yml'
     default-schema: 'app'
+
+  cache:
+    type: 'redis'
+    redis:
+      host: "${REDIS_HOST}"
+      port: "${REDIS_PORT}"
 
 logging:
   level:

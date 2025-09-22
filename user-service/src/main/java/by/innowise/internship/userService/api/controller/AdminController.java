@@ -18,7 +18,7 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("/api/v1/admin")
+@RequestMapping("/admin")
 public class AdminController {
 
     private final UserService userService;

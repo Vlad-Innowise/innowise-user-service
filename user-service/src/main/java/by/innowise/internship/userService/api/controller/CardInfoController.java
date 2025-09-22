@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/cards")
+@RequestMapping("/cards")
 @RequiredArgsConstructor
 @Slf4j
 @Validated

@@ -21,7 +21,9 @@ import java.util.List;
 public class SecurityConfig {
 
     private static final List<String> WHITELIST_PATHS = List.of(
-            "/api/v1/internal", "/api/v1/internal/**");
+            "/api/v1/internal", "/api/v1/internal/**",
+            "/actuator/health", "/actuator/health/**"
+    );
 
     @Bean
     public JwtFilterConfigurer whitelistConfigurer() {
